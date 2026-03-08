@@ -1,0 +1,3485 @@
+<!doctype html>
+<html lang="th" class="h-full">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ใบเบิกค่าใช้จ่ายในการเดินทางไปราชการ - แบบ 8708</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* 1. นำเข้าฟอนต์ TH Sarabun IT9 (รองรับการดึงจากในเครื่อง) */
+    @font-face {
+      font-family: 'THSarabunIT9';
+      src: local('TH Sarabun IT๙'),
+        local('THSarabunIT9'),
+        local('THSarabun IT9');
+      font-weight: normal;
+    }
+
+    @font-face {
+      font-family: 'THSarabunIT9';
+      src: local('TH Sarabun IT๙ Bold'),
+        local('THSarabunIT9-Bold'),
+        local('THSarabun IT9 Bold');
+      font-weight: bold;
+    }
+
+    /* 2. ฟอนต์พื้นฐานของระบบฟอร์ม (คงเดิมไว้ให้อ่านง่ายบนจอ) */
+    * {
+      font-family: 'Sarabun', sans-serif;
+    }
+
+    /* 3. บังคับใช้ฟอนต์ TH Sarabun IT9 เฉพาะในพื้นที่เอกสาร (ส่วนที่ 1 และ 2) */
+    #document-page .print-container,
+    #document2-page .print-container,
+    #document-page .print-container *,
+    #document2-page .print-container * {
+      font-family: 'THSarabunIT9', 'Sarabun', sans-serif !important;
+      font-size: 10pt;
+      /* แนะนำให้เพิ่มขนาดเป็น 16pt ตามมาตรฐานเอกสารราชการ */
+    }
+
+    /* จัดการกระดาษ A4 (แสดงบนจอ) */
+    .a4-paper {
+      width: 210mm !important;
+      min-height: 297mm !important;
+      padding: 20mm 15mm !important;
+      /* ระยะขอบกระดาษ: บน-ล่าง 2ซม. ซ้าย-ขวา 1.5ซม. */
+      margin: 0 auto;
+      background: white;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    /* กระดาษ A4 แนวนอน (Landscape) */
+    .a4-landscape-paper {
+      width: 297mm !important;
+      min-height: 210mm !important;
+      padding: 12mm 15mm !important;
+      margin: 0 auto;
+      background: white;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    @media print {
+      @page {
+        size: A4;
+        margin: 0;
+        /* บังคับ margin ของระบบปริ้นท์เป็น 0 เพื่อใช้ขอบจาก padding ของ .a4-paper แทน */
+      }
+
+      body,
+      html {
+        background: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      .a4-paper,
+      .a4-landscape-paper {
+        margin: 0 !important;
+        box-shadow: none !important;
+        width: 100% !important;
+        /* ใช้เต็มความกว้าง */
+        page-break-after: avoid;
+        /* ป้องกันการขึ้นหน้าใหม่โดยไม่จำเป็น */
+        page-break-inside: avoid;
+      }
+
+      .no-print,
+      .print-button-container {
+        display: none !important;
+      }
+    }
+
+    .editable-field {
+      border-bottom: 1px dotted #333;
+      padding: 0 4px;
+      background: transparent;
+      outline: none;
+      flex: 1;
+      min-width: 40px;
+      /* เพิ่ม 3 บรรทัดนี้เพื่อล็อคตำแหน่งตอนปรินท์ PDF */
+      display: inline-block;
+      white-space: nowrap;
+      vertical-align: bottom;
+    }
+
+    .editable-field:focus {
+      background: #fffbeb;
+      border-bottom-color: #2563eb;
+    }
+
+    .line-with-dots {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .line-with-dots span:last-child:not(.label) {
+      margin-left: auto;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .status-pending {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-approved {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+
+    .status-rejected {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 16px;
+      padding: 16px;
+      border-left: 3px solid #e5e7eb;
+      margin-bottom: 16px;
+    }
+
+    .timeline-item.active {
+      border-left-color: #3b82f6;
+      background-color: #eff6ff;
+    }
+
+    .timeline-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: #9ca3af;
+      margin-top: 4px;
+      flex-shrink: 0;
+    }
+
+    .timeline-item.active .timeline-dot {
+      background-color: #3b82f6;
+      width: 16px;
+      height: 16px;
+      margin-top: 2px;
+    }
+
+    .history-card {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .history-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-color: #3b82f6;
+    }
+
+    .date-input-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      align-items: flex-end;
+    }
+
+    .date-input-group label {
+      display: block;
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+
+    .date-input-group input,
+    .date-input-group select {
+      padding: 6px 8px;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      font-size: 0.875rem;
+    }
+  </style>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+
+<body class="h-full overflow-auto bg-blue-100">
+  <div class="min-h-full" style="height: 100%;">
+    <!-- Navigation Tabs -->
+    <div class="no-print sticky top-0 bg-white border-b border-gray-200 shadow-sm z-50">
+      <div class="max-w-6xl mx-auto px-4 flex justify-center gap-0 flex-wrap overflow-x-auto">
+        <button onclick="showPage('form')"
+          class="page-tab px-4 py-3 font-semibold border-b-2 border-blue-600 text-blue-600 text-sm whitespace-nowrap"
+          data-page="form"> 📋 ฟอร์มกรอก </button>
+        <button onclick="showPage('document')"
+          class="page-tab px-4 py-3 font-semibold border-b-2 border-transparent text-gray-600 hover:text-blue-600 text-sm whitespace-nowrap"
+          data-page="document"> 📄 เอกสารส่วนที่ 1 </button>
+        <button onclick="showPage('document2')"
+          class="page-tab px-4 py-3 font-semibold border-b-2 border-transparent text-gray-600 hover:text-blue-600 text-sm whitespace-nowrap"
+          data-page="document2"> 📄 เอกสารส่วนที่ 2 </button>
+        <button onclick="showPage('document3')"
+          class="page-tab px-4 py-3 font-semibold border-b-2 border-transparent text-gray-600 hover:text-blue-600 text-sm whitespace-nowrap"
+          data-page="document3"> 📄 เอกสารส่วนที่ 3 </button>
+        <button onclick="showPage('approval')"
+          class="page-tab px-4 py-3 font-semibold border-b-2 border-transparent text-gray-600 hover:text-blue-600 text-sm whitespace-nowrap"
+          data-page="approval"> ✅ ฟอร์มอนุมัติ </button>
+        <button onclick="showPage('tracking')"
+          class="page-tab px-4 py-3 font-semibold border-b-2 border-transparent text-gray-600 hover:text-blue-600 text-sm whitespace-nowrap"
+          data-page="tracking"> 📊 ติดตามสถานะ </button>
+        <button onclick="showPage('handbook')"
+          class="page-tab px-4 py-3 font-semibold border-b-2 border-transparent text-gray-600 hover:text-blue-600 text-sm whitespace-nowrap"
+          data-page="handbook"> 📕 คู่มือค่าใช้จ่าย </button>
+      </div>
+    </div>
+
+    <!-- Page 1: Form -->
+    <div id="form-page" class="page-content min-h-full py-6 px-4 bg-blue-100">
+      <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-2xl font-bold text-center mb-6 text-blue-900">กรอกข้อมูลการเดินทางราชการ</h1>
+        <form id="expense-form" class="space-y-6">
+          <!-- Section 1: Loan Info -->
+          <fieldset class="border rounded-lg p-4 bg-pink-50">
+            <legend class="text-lg font-semibold text-blue-900 px-2">📌 ข้อมูลเงินยืม</legend>
+            <div class="grid grid-cols-1 gap-4 mt-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">เลขที่สัญญา</label>
+                <input type="text" id="loanNumber"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">วันที่</label>
+                <div class="date-input-group">
+                  <div>
+                    <label>วัน</label>
+                    <select id="loanDate"></select>
+                  </div>
+                  <div>
+                    <label>เดือน</label>
+                    <select id="loanMonth">
+                      <option value="">-- เลือก --</option>
+                      <option value="มกราคม">มกราคม</option>
+                      <option value="กุมภาพันธ์">กุมภาพันธ์</option>
+                      <option value="มีนาคม">มีนาคม</option>
+                      <option value="เมษายน">เมษายน</option>
+                      <option value="พฤษภาคม">พฤษภาคม</option>
+                      <option value="มิถุนายน">มิถุนายน</option>
+                      <option value="กรกฎาคม">กรกฎาคม</option>
+                      <option value="สิงหาคม">สิงหาคม</option>
+                      <option value="กันยายน">กันยายน</option>
+                      <option value="ตุลาคม">ตุลาคม</option>
+                      <option value="พฤศจิกายน">พฤศจิกายน</option>
+                      <option value="ธันวาคม">ธันวาคม</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label>ปี พ.ศ.</label>
+                    <select id="loanYear"></select>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อผู้ยืม</label>
+                <select id="borrowerName"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                  <option value="">-- เลือก --</option>
+                  <option value="นางวรจิตร์ ปัญญาดี">นางวรจิตร์ ปัญญาดี</option>
+                  <option value="นาย กฤติเดช อุไพพร">นาย กฤติเดช อุไพพร</option>
+                  <option value="นางสาว สุดารัตน์ ผุยสุ">นางสาว สุดารัตน์ ผุยสุ</option>
+                  <option value="นางสาว รัฏธิดา วังศรี">นางสาว รัฏธิดา วังศรี</option>
+                  <option value="นาง มนัสนันท์ ชาเมืองศรี">นาง มนัสนันท์ ชาเมืองศรี</option>
+                  <option value="นาง วิยะดา นาระคล">นาง วิยะดา นาระคล</option>
+                  <option value="นางสาว สุเพ็ญศรี จันโทภาส">นางสาว สุเพ็ญศรี จันโทภาส</option>
+                  <option value="นาง จงกลณีย์ แสนสงคราม">นาง จงกลณีย์ แสนสงคราม</option>
+                  <option value="นางสาว ชลธิชา ทาระขันธ์">นางสาว ชลธิชา ทาระขันธ์</option>
+                  <option value="นางสาวพรรณลิณี แผนเมือง">นางสาวพรรณลิณี แผนเมือง</option>
+                  <option value="นาย คมสันต์ ล่องวิเชียร">นาย คมสันต์ ล่องวิเชียร</option>
+                  <option value="นาง สุจิรา เพชรเกื้อ">นาง สุจิรา เพชรเกื้อ</option>
+                  <option value="นาย ณรงค์ฤทธิ์ สุนีย์">นาย ณรงค์ฤทธิ์ สุนีย์</option>
+                  <option value="นางสาว สิริภรณ์ ค้าโชค">นางสาว สิริภรณ์ ค้าโชค</option>
+                  <option value="นางสาว ยลดา ชาวไทย">นางสาว ยลดา ชาวไทย</option>
+                  <option value="นาง จิราพร ศรีพิลา">นาง จิราพร ศรีพิลา</option>
+                  <option value="นางสาว พิตติภรณ์ จิรภัทร์ชนินทร์">นางสาว พิตติภรณ์ จิรภัทร์ชนินทร์</option>
+                  <option value="นางสาวศศิวิมล ใหมจันทร์">นางสาวศศิวิมล ใหมจันทร์</option>
+                  <option value="นายธนวัฒน์ อัคแก้ว">นายธนวัฒน์ อัคแก้ว</option>
+                  <option value="นางสาว อโณทัย ธนะสิทธิ์">นางสาว อโณทัย ธนะสิทธิ์</option>
+                  <option value="นางสาว ปิ่นกนก อุปพงษ์">นางสาว ปิ่นกนก อุปพงษ์</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">จำนวนเงิน (บาท)</label>
+                <input type="number" id="borrowerAmount"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Section 2: Personal Info -->
+          <fieldset class="border rounded-lg p-4 bg-green-50">
+            <legend class="text-lg font-semibold text-green-900 px-2">👤 ข้อมูลผู้เดินทาง</legend>
+            <div class="grid grid-cols-1 gap-4 mt-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">สำนักที่ทำการ</label>
+                <input type="text" id="office"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">วันที่กรอกฟอร์ม</label>
+                <div class="date-input-group">
+                  <div><label>วัน</label><select id="formDate"></select></div>
+                  <div><label>เดือน</label>
+                    <select id="formMonth">
+                      <option value="">-- เลือก --</option>
+                      <option value="มกราคม">มกราคม</option>
+                      <option value="กุมภาพันธ์">กุมภาพันธ์</option>
+                      <option value="มีนาคม">มีนาคม</option>
+                      <option value="เมษายน">เมษายน</option>
+                      <option value="พฤษภาคม">พฤษภาคม</option>
+                      <option value="มิถุนายน">มิถุนายน</option>
+                      <option value="กรกฎาคม">กรกฎาคม</option>
+                      <option value="สิงหาคม">สิงหาคม</option>
+                      <option value="กันยายน">กันยายน</option>
+                      <option value="ตุลาคม">ตุลาคม</option>
+                      <option value="พฤศจิกายน">พฤศจิกายน</option>
+                      <option value="ธันวาคม">ธันวาคม</option>
+                    </select>
+                  </div>
+                  <div><label>ปี พ.ศ.</label><select id="formYear"></select></div>
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อ - นามสกุล</label>
+                <select id="fullName"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  onchange="updatePosition()">
+                  <option value="">-- เลือก --</option>
+                  <option value="นางวรจิตร์ ปัญญาดี">นางวรจิตร์ ปัญญาดี</option>
+                  <option value="นาย กฤติเดช อุไพพร">นาย กฤติเดช อุไพพร</option>
+                  <option value="นางสาว สุดารัตน์ ผุยสุ">นางสาว สุดารัตน์ ผุยสุ</option>
+                  <option value="นางสาว รัฏธิดา วังศรี">นางสาว รัฏธิดา วังศรี</option>
+                  <option value="นาง มนัสนันท์ ชาเมืองศรี">นาง มนัสนันท์ ชาเมืองศรี</option>
+                  <option value="นาง วิยะดา นาระคล">นาง วิยะดา นาระคล</option>
+                  <option value="นางสาว สุเพ็ญศรี จันโทภาส">นางสาว สุเพ็ญศรี จันโทภาส</option>
+                  <option value="นาง จงกลณีย์ แสนสงคราม">นาง จงกลณีย์ แสนสงคราม</option>
+                  <option value="นางสาว ชลธิชา ทาระขันธ์">นางสาว ชลธิชา ทาระขันธ์</option>
+                  <option value="นางสาวพรรณลิณี แผนเมือง">นางสาวพรรณลิณี แผนเมือง</option>
+                  <option value="นาย คมสันต์ ล่องวิเชียร">นาย คมสันต์ ล่องวิเชียร</option>
+                  <option value="นาง สุจิรา เพชรเกื้อ">นาง สุจิรา เพชรเกื้อ</option>
+                  <option value="นาย ณรงค์ฤทธิ์ สุนีย์">นาย ณรงค์ฤทธิ์ สุนีย์</option>
+                  <option value="นางสาว สิริภรณ์ ค้าโชค">นางสาว สิริภรณ์ ค้าโชค</option>
+                  <option value="นางสาว ยลดา ชาวไทย">นางสาว ยลดา ชาวไทย</option>
+                  <option value="นาง จิราพร ศรีพิลา">นาง จิราพร ศรีพิลา</option>
+                  <option value="นางสาว พิตติภรณ์ จิรภัทร์ชนินทร์">นางสาว พิตติภรณ์ จิรภัทร์ชนินทร์</option>
+                  <option value="นางสาวศศิวิมล ใหมจันทร์">นางสาวศศิวิมล ใหมจันทร์</option>
+                  <option value="นายธนวัฒน์ อัคแก้ว">นายธนวัฒน์ อัคแก้ว</option>
+                  <option value="นางสาว อโณทัย ธนะสิทธิ์">นางสาว อโณทัย ธนะสิทธิ์</option>
+                  <option value="นางสาว นนน อุปพงษ์">นางสาว นนน อุปพงษ์</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">ตำแหน่ง</label>
+                <input type="text" id="position"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  readonly>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">สังกัด</label>
+                <input type="text" id="department"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value="คลังจังหวัดสกลนคร" readonly>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">ผู้ร่วมเดินทาง (ถ้ามี)</label>
+                <textarea id="companions" rows="3"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Section 3: Travel Details -->
+          <fieldset class="border rounded-lg p-4 bg-purple-50">
+            <legend class="text-lg font-semibold text-purple-900 px-2">✈️ รายละเอียดการเดินทาง</legend>
+            <div class="space-y-4 mt-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">ตามคำสั่ง/บันทึกที่</label>
+                <input type="text" id="commandNumber"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">ลงวันที่</label>
+                <div class="date-input-group">
+                  <div><label>วัน</label><select id="commandDate"></select></div>
+                  <div><label>เดือน</label>
+                    <select id="commandMonth">
+                      <option value="">-- เลือก --</option>
+                      <option value="มกราคม">มกราคม</option>
+                      <option value="กุมภาพันธ์">กุมภาพันธ์</option>
+                      <option value="มีนาคม">มีนาคม</option>
+                      <option value="เมษายน">เมษายน</option>
+                      <option value="พฤษภาคม">พฤษภาคม</option>
+                      <option value="มิถุนายน">มิถุนายน</option>
+                      <option value="กรกฎาคม">กรกฎาคม</option>
+                      <option value="สิงหาคม">สิงหาคม</option>
+                      <option value="กันยายน">กันยายน</option>
+                      <option value="ตุลาคม">ตุลาคม</option>
+                      <option value="พฤศจิกายน">พฤศจิกายน</option>
+                      <option value="ธันวาคม">ธันวาคม</option>
+                    </select>
+                  </div>
+                  <div><label>ปี พ.ศ.</label><select id="commandYear"></select></div>
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">วัตถุประสงค์การเดินทาง</label>
+                <textarea id="travelPurpose" rows="2"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Departure -->
+                <div class="space-y-3">
+                  <p class="font-medium text-sm text-gray-700">🛫 ออกเดินทางจาก</p>
+                  <div class="flex gap-4">
+                    <label class="flex items-center gap-2">
+                      <input type="radio" name="startType" value="บ้านพัก" class="w-4 h-4 text-blue-600">
+                      <span class="text-sm">บ้านพัก</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                      <input type="radio" name="startType" value="สำนักงาน" class="w-4 h-4 text-blue-600">
+                      <span class="text-sm">สำนักงาน</span>
+                    </label>
+                  </div>
+                  <div class="date-input-group">
+                    <div>
+                      <label>วัน</label>
+                      <select id="startDate"></select>
+                    </div>
+                    <div>
+                      <label>เดือน</label>
+                      <select id="startMonth">
+                        <option value="">-- เลือก --</option>
+                        <option value="มกราคม">มกราคม</option>
+                        <option value="กุมภาพันธ์">กุมภาพันธ์</option>
+                        <option value="มีนาคม">มีนาคม</option>
+                        <option value="เมษายน">เมษายน</option>
+                        <option value="พฤษภาคม">พฤษภาคม</option>
+                        <option value="มิถุนายน">มิถุนายน</option>
+                        <option value="กรกฎาคม">กรกฎาคม</option>
+                        <option value="สิงหาคม">สิงหาคม</option>
+                        <option value="กันยายน">กันยายน</option>
+                        <option value="ตุลาคม">ตุลาคม</option>
+                        <option value="พฤศจิกายน">พฤศจิกายน</option>
+                        <option value="ธันวาคม">ธันวาคม</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label>ปี พ.ศ.</label>
+                      <select id="startYear"></select>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-1">เวลา (น.)</label>
+                    <input type="text" id="startTime" placeholder="08:30"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                  </div>
+                </div>
+
+                <!-- Arrival -->
+                <div class="space-y-3">
+                  <p class="font-medium text-sm text-gray-700">🛬 กลับถึง</p>
+                  <div class="flex gap-4">
+                    <label class="flex items-center gap-2">
+                      <input type="radio" name="endType" value="บ้านพัก" class="w-4 h-4 text-blue-600">
+                      <span class="text-sm">บ้านพัก</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                      <input type="radio" name="endType" value="สำนักงาน" class="w-4 h-4 text-blue-600">
+                      <span class="text-sm">สำนักงาน</span>
+                    </label>
+                  </div>
+                  <div class="date-input-group">
+                    <div>
+                      <label>วัน</label>
+                      <select id="endDate"></select>
+                    </div>
+                    <div>
+                      <label>เดือน</label>
+                      <select id="endMonth">
+                        <option value="">-- เลือก --</option>
+                        <option value="มกราคม">มกราคม</option>
+                        <option value="กุมภาพันธ์">กุมภาพันธ์</option>
+                        <option value="มีนาคม">มีนาคม</option>
+                        <option value="เมษายน">เมษายน</option>
+                        <option value="พฤษภาคม">พฤษภาคม</option>
+                        <option value="มิถุนายน">มิถุนายน</option>
+                        <option value="กรกฎาคม">กรกฎาคม</option>
+                        <option value="สิงหาคม">สิงหาคม</option>
+                        <option value="กันยายน">กันยายน</option>
+                        <option value="ตุลาคม">ตุลาคม</option>
+                        <option value="พฤศจิกายน">พฤศจิกายน</option>
+                        <option value="ธันวาคม">ธันวาคม</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label>ปี พ.ศ.</label>
+                      <select id="endYear"></select>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-1">เวลา (น.)</label>
+                    <input type="text" id="endTime" placeholder="16:30"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4 pt-4 border-t">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">รวมจำนวนวัน</label>
+                  <input type="number" id="totalDays"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50" readonly>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">เศษชั่วโมง</label>
+                  <input type="number" id="totalHours"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50" readonly>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Section 4: Expenses -->
+          <fieldset class="border rounded-lg p-4 bg-orange-50">
+            <legend class="text-lg font-semibold text-orange-900 px-2">💰 รายการค่าใช้จ่าย</legend>
+            <div class="space-y-4 mt-4">
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-1">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">ประเภทเบี้ยเลี้ยง (บาท)</label>
+                  <input type="number" id="mealAllowance" placeholder="เช่น 240"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">จำนวนวัน</label>
+                  <input type="number" id="mealDays"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">รวมเงินเบี้ยเลี้ยง</label>
+                  <input type="number" id="mealTotal"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 font-bold text-blue-700"
+                    readonly tabindex="-1">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-1">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">ประเภทที่พัก (บาท)</label>
+                  <input type="number" id="lodgingType" placeholder="เช่น 800"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">จำนวนวัน</label>
+                  <input type="number" id="lodgingDays"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">รวมเงินที่พัก</label>
+                  <input type="number" id="lodgingTotal"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 font-bold text-blue-700"
+                    readonly tabindex="-1">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">รายละเอียดค่าพาหนะ</label>
+                  <input type="text" id="transport"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">รวมเงินค่าพาหนะ</label>
+                  <input type="number" id="transportTotal"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">ค่าใช้จ่ายอื่นๆ</label>
+                  <input type="text" id="otherExpense"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">รวมเงินค่าใช้จ่ายอื่นๆ</label>
+                  <input type="number" id="otherTotal"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+              </div>
+
+              <div class="pt-4 border-t">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-bold text-gray-800 mb-1">รวมเงินทั้งสิ้น</label>
+                    <input type="number" id="grandTotal"
+                      class="w-full px-3 py-2 border-2 border-orange-300 rounded-lg bg-white font-bold text-lg text-red-600"
+                      readonly tabindex="-1">
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">จำนวนเงินตัวอักษร</label>
+                    <input type="text" id="grandTotalWords"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50" readonly tabindex="-1">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Section 5: Signature -->
+          <fieldset class="border rounded-lg p-4 bg-gray-50">
+            <legend class="text-lg font-semibold text-gray-900 px-2">✍️ การลงชื่อ</legend>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">จำนวนหลักฐาน (ฉบับ)</label>
+                <input type="number" id="evidenceCount" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อผู้ลงนาม</label>
+                <select id="signatureName"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  onchange="updateSignaturePosition()">
+                  <option value="">-- เลือก --</option>
+                  <option value="นางวรจิตร์ ปัญญาดี">นางวรจิตร์ ปัญญาดี</option>
+                  <option value="นาย กฤติเดช อุไพพร">นาย กฤติเดช อุไพพร</option>
+                  <option value="นางสาว สุดารัตน์ ผุยสุ">นางสาว สุดารัตน์ ผุยสุ</option>
+                  <option value="นางสาว รัฏธิดา วังศรี">นางสาว รัฏธิดา วังศรี</option>
+                  <option value="นาง มนัสนันท์ ชาเมืองศรี">นาง มนัสนันท์ ชาเมืองศรี</option>
+                  <option value="นาง วิยะดา นาระคล">นาง วิยะดา นาระคล</option>
+                  <option value="นางสาว สุเพ็ญศรี จันโทภาส">นางสาว สุเพ็ญศรี จันโทภาส</option>
+                  <option value="นาง จงกลณีย์ แสนสงคราม">นาง จงกลณีย์ แสนสงคราม</option>
+                  <option value="นางสาว ชลธิชา ทาระขันธ์">นางสาว ชลธิชา ทาระขันธ์</option>
+                  <option value="นางสาวพรรณลิณี แผนเมือง">นางสาวพรรณลิณี แผนเมือง</option>
+                  <option value="นาย คมสันต์ ล่องวิเชียร">นาย คมสันต์ ล่องวิเชียร</option>
+                  <option value="นาง สุจิรา เพชรเกื้อ">นาง สุจิรา เพชรเกื้อ</option>
+                  <option value="นาย ณรงค์ฤทธิ์ สุนีย์">นาย ณรงค์ฤทธิ์ สุนีย์</option>
+                  <option value="นางสาว สิริภรณ์ ค้าโชค">นางสาว สิริภรณ์ ค้าโชค</option>
+                  <option value="นางสาว ยลดา ชาวไทย">นางสาว ยลดา ชาวไทย</option>
+                  <option value="นาง จิราพร ศรีพิลา">นาง จิราพร ศรีพิลา</option>
+                  <option value="นางสาว พิตติภรณ์ จิรภัทร์ชนินทร์">นางสาว พิตติภรณ์ จิรภัทร์ชนินทร์</option>
+                  <option value="นางสาวศศิวิมล ใหมจันทร์">นางสาวศศิวิมล ใหมจันทร์</option>
+                  <option value="นายธนวัฒน์ อัคแก้ว">นายธนวัฒน์ อัคแก้ว</option>
+                  <option value="นางสาว อโณทัย ธนะสิทธิ์">นางสาว อโณทัย ธนะสิทธิ์</option>
+                  <option value="นางสาว ปิ่นกนก อุปพงษ์">นางสาว ปิ่นกนก อุปพงษ์</option>
+                </select>
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">ตำแหน่ง</label>
+                <input type="text" id="signaturePosition"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50" readonly>
+              </div>
+            </div>
+          </fieldset>
+
+          <div class="flex gap-4 justify-center pt-6">
+            <button type="button" onclick="clearForm()"
+              class="px-6 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">
+              ล้างข้อมูล </button>
+            <button type="submit"
+              class="px-8 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-colors shadow-lg">
+              บันทึกและดูเอกสาร </button>
+          </div>
+        </form>
+
+        <div id="save-message" class="mt-4 p-3 rounded hidden text-center font-semibold"></div>
+      </div>
+      <div class="text-center py-6">
+        <p class="text-gray-500 text-lg font-bold">👨‍💻 พัฒนาโดย นางสาวพรรณลิณี แผนเมือง</p>
+        <p class="text-gray-400 text-sm font-bold">นักวิชาการเงินและบัญชี</p>
+        <!--p class="text-gray-400 text-sm font-bold">กลุ่มงานวิชาการ</p-->
+        <p class="text-gray-500 text-lg font-bold">👨‍💻 ผู้ร่วมทีมพัฒนา นางสาวอาลิตา เชาวนประเสริฐ</p>
+        <p class="text-gray-400 text-sm font-bold">นักจัดการงานทั่วไปปฏิบัติการ</p>
+        <!--p class="text-gray-400 text-sm">สำนักงานคลังจังหวัดสกลนคร</p-->
+      </div>
+    </div>
+
+    <!-- Page 2: Document View Part 1 -->
+    <div id="document-page" class="page-content hidden py-4 px-2">
+      <div class="print-button-container max-w-4xl mx-auto mb-4 flex gap-2 justify-end">
+        <!--button onclick="downloadPDF('document-page', 'ใบเบิกค่าใช้จ่าย_ส่วนที่1.pdf')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
+      📑 โหลด PDF
+    </button-->
+        <button onclick="printDocument('document-page')"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
+          🖨️ พิมพ์ส่วนที่ 1
+        </button>
+      </div>
+
+      <div class="print-container a4-paper text-[10pt] leading-tight text-black">
+
+        <div class="flex justify-end mb-2">
+          <div class="text-right leading-tight">
+            <div>แบบ ๘๗๐๘</div>
+            <div>ส่วนที่ ๑</div>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-1 mb-4">
+          <div class="flex items-end gap-1">
+            <span class="w-28">สัญญาเงินยืมเลขที่</span>
+            <span contenteditable="true" class="editable-field flex-1" id="doc-loanNumber">-</span>
+            <span class="w-10 text-center">วันที่</span>
+            <span contenteditable="true" class="editable-field w-40 text-center" id="doc-loanDate">-</span>
+          </div>
+          <div class="flex items-end gap-1">
+            <span class="w-16">ชื่อผู้ยืม</span>
+            <span contenteditable="true" class="editable-field flex-1" id="doc-borrowerName">-</span>
+            <span class="w-16 text-center">จำนวนเงิน</span>
+            <span contenteditable="true" class="editable-field w-32 text-center" id="doc-borrowerAmount">-</span>
+            <span>บาท</span>
+          </div>
+        </div>
+
+        <h1 class="text-center font-bold text-[18pt] mb-4">ใบเบิกค่าใช้จ่ายในการเดินทางไปราชการ</h1>
+
+        <div class="flex justify-end mb-4">
+          <div class="w-2/3 flex flex-col gap-1">
+            <div class="flex items-end gap-1">
+              <span class="w-16">ที่ทำการ</span>
+              <span contenteditable="true" class="editable-field flex-1" id="doc-office">-</span>
+            </div>
+            <div class="flex items-end gap-1">
+              <span class="w-10">วันที่</span>
+              <span contenteditable="true" class="editable-field w-16 text-center" id="doc-formDate_day">-</span>
+              <span class="w-10 text-center">เดือน</span>
+              <span contenteditable="true" class="editable-field flex-1 text-center" id="doc-formDate_month">-</span>
+              <span class="w-10 text-center">พ.ศ.</span>
+              <span contenteditable="true" class="editable-field w-16 text-center" id="doc-formDate_year">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-1 mb-4">
+          <div class="flex items-end gap-2">
+            <span class="w-10">เรื่อง</span>
+            <span>ขออนุมัติเบิกค่าใช้จ่ายในการเดินทางไปราชการ</span>
+          </div>
+          <div class="flex items-end gap-1">
+            <span class="w-10">เรียน</span>
+            <span contenteditable="true" class="editable-field w-1/2">คลังจังหวัดสกลนคร</span>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-1.5 mb-3 leading-relaxed">
+          <div class="flex items-end gap-1 pl-16">
+            <span>ตามคำสั่ง/บันทึก ที่</span>
+            <span contenteditable="true" class="editable-field flex-1 text-center" id="doc-commandNumber">-</span>
+            <span>ลงวันที่</span>
+            <span contenteditable="true" class="editable-field w-48 text-center" id="doc-commandDate">-</span>
+            <span>ได้อนุมัติให้</span>
+          </div>
+          <div class="flex items-end gap-1">
+            <span class="w-12">ข้าพเจ้า</span>
+            <span contenteditable="true" class="editable-field flex-1 text-center" id="doc-fullName">-</span>
+            <span class="w-14 text-center">ตำแหน่ง</span>
+            <span contenteditable="true" class="editable-field flex-1 text-center" id="doc-position">-</span>
+          </div>
+          <div class="flex items-end gap-1">
+            <span class="w-10">สังกัด</span>
+            <span contenteditable="true" class="editable-field flex-1 text-center" id="doc-department">-</span>
+            <span class="w-16 text-center">พร้อมด้วย</span>
+            <span contenteditable="true" class="editable-field flex-1 text-center" id="doc-companions">-</span>
+          </div>
+          <div class="relative w-full h-[4.4rem] leading-[2.2rem] mb-1 overflow-hidden bg-white"
+            style="-webkit-print-color-adjust: exact; print-color-adjust: exact; background-image: linear-gradient(to right, #333 40%, rgba(255,255,255,0) 0%), linear-gradient(to right, #333 40%, rgba(255,255,255,0) 0%); background-position: 0 1.6rem, 0 3.84rem; background-size: 3px 1px; background-repeat: repeat-x;">
+
+            <div class="absolute top-0 left-0 w-36 leading-[2.2rem] bg-white pointer-events-none z-10">
+              <span>เดินทางไปปฏิบัติราชการ</span>
+            </div>
+
+            <span class="inline-block w-36 text-transparent pointer-events-none select-none">.</span>
+
+            <span contenteditable="true" class="editable-field inline break-words whitespace-normal"
+              id="doc-travelPurpose">-</span>
+
+            <div class="absolute bottom-0 right-0 leading-[2.2rem] bg-white pl-2 pointer-events-none z-10">
+              <span>โดยออกเดินทางจาก</span>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-1.5 mb-4">
+          <div class="flex-1">
+            <span class="inline-block w-5 text-center" id="doc-start-home">◯</span><span class="mr-2">บ้านพัก</span>
+            <span class="inline-block w-5 text-center" id="doc-start-office">◯</span><span class="mr-2">สำนักงาน</span>
+            <span class="inline-block w-5 text-center">◯</span><span class="mr-2">ประเทศไทย</span>
+
+            <span>ตั้งแต่วันที่</span>
+            <span contenteditable="true" class="editable-field inline-block w-4 text-center border-b border-gray-300"
+              id="doc-startDate">-</span>
+
+            <span>เดือน</span>
+            <span contenteditable="true" class="editable-field inline-block w-20 text-center border-b border-gray-300"
+              id="doc-startMonth">-</span>
+
+            <span>พ.ศ.</span>
+            <span contenteditable="true" class="editable-field inline-block w-16 text-center border-b border-gray-300"
+              id="doc-startYear">-</span>
+
+            <span>เวลา</span>
+            <span contenteditable="true" class="editable-field inline-block w-12 text-center border-b border-gray-300"
+              id="doc-startTime">-</span>
+            <span>น.</span>
+          </div>
+          <div class="flex-1">
+            <span>และกลับถึง</span>
+
+            <span class="inline-block w-5 text-center ml-2" id="doc-end-home">◯</span><span class="mr-2">บ้านพัก</span>
+            <span class="inline-block w-5 text-center" id="doc-end-office">◯</span><span class="mr-2">สำนักงาน</span>
+            <span class="inline-block w-5 text-center">◯</span><span class="mr-2">ประเทศไทย</span>
+
+            <span>ตั้งแต่วันที่</span>
+            <span contenteditable="true"
+              class="editable-field inline-block w-4 text-center border-b border-dotted border-gray-400"
+              id="doc-endDate">-</span>
+
+            <span>เดือน</span>
+            <span contenteditable="true"
+              class="editable-field inline-block w-20 text-center border-b border-dotted border-gray-400"
+              id="doc-endMonth">-</span>
+
+            <span>พ.ศ.</span>
+            <span contenteditable="true"
+              class="editable-field inline-block w-12 text-center border-b border-dotted border-gray-400"
+              id="doc-endYear">-</span>
+
+            <span>เวลา</span>
+            <span contenteditable="true"
+              class="editable-field inline-block w-12 text-center border-b border-dotted border-gray-400"
+              id="doc-endTime">-</span>
+
+            <span>น.</span>
+          </div>
+          <div class="flex items-end gap-1">
+            <span>รวมเวลาไปราชการครั้งนี้</span>
+            <span contenteditable="true" class="editable-field w-16 text-center"
+              id="doc-totalDays">-</span><span>วัน</span>
+            <span contenteditable="true" class="editable-field w-16 text-center"
+              id="doc-totalHours">-</span><span>ชั่วโมง</span>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-1.5 mb-4">
+          <div class="flex items-end gap-1 pl-16 mb-1">
+            <span>ข้าพเจ้าขอเบิกค่าใช้จ่ายในการเดินทางไปราชการสำหรับ</span>
+            <span class="w-5 text-center ml-2">◯</span><span class="mr-2">ข้าพเจ้า</span>
+            <span class="w-5 text-center">◯</span><span class="mr-2">คณะเดินทาง</span>
+            <span>ดังนี้</span>
+          </div>
+          <!-- บรรทัดที่ 1: ค่าเบี้ยเลี้ยง -->
+          <div class="flex items-end gap-1">
+            <span class="w-44 flex-shrink-0">ค่าเบี้ยเลี้ยงเดินทางประเภท</span>
+            <span contenteditable="true"
+              class="editable-field flex-1 text-center border-b border-dotted border-gray-400"
+              id="doc-mealAllowance">-</span>
+            <span class="w-12 text-center flex-shrink-0">จำนวน</span>
+            <span contenteditable="true" class="editable-field w-12 text-center border-b border-dotted border-gray-400"
+              id="doc-mealDays">-</span>
+            <span class="w-8 text-center flex-shrink-0">วัน</span>
+            <span class="w-10 text-center flex-shrink-0">รวม</span>
+            <span contenteditable="true"
+              class="editable-field w-28 text-right pr-2 border-b border-dotted border-gray-400"
+              id="doc-mealTotal">-</span>
+            <span class="w-8 text-right flex-shrink-0">บาท</span>
+          </div>
+
+          <!-- บรรทัดที่ 2: ค่าเช่าที่พัก -->
+          <div class="flex items-end gap-1">
+            <span class="w-44 flex-shrink-0">ค่าเช่าที่พักประเภท</span>
+            <span contenteditable="true"
+              class="editable-field flex-1 text-center border-b border-dotted border-gray-400"
+              id="doc-lodgingType">-</span>
+            <span class="w-12 text-center flex-shrink-0">จำนวน</span>
+            <span contenteditable="true" class="editable-field w-12 text-center border-b border-dotted border-gray-400"
+              id="doc-lodgingDays">-</span>
+            <span class="w-8 text-center flex-shrink-0">วัน</span>
+            <span class="w-10 text-center flex-shrink-0">รวม</span>
+            <span contenteditable="true"
+              class="editable-field w-28 text-right pr-2 border-b border-dotted border-gray-400"
+              id="doc-lodgingTotal">-</span>
+            <span class="w-8 text-right flex-shrink-0">บาท</span>
+          </div>
+
+          <!-- บรรทัดที่ 3: ค่าพาหนะ -->
+          <div class="flex items-end gap-1">
+            <span class="w-44 flex-shrink-0">ค่าพาหนะ</span>
+            <span contenteditable="true"
+              class="editable-field flex-1 text-center border-b border-dotted border-gray-400"
+              id="doc-transport">-</span>
+            <!-- เว้นพื้นที่ให้ตรงกับคอลัมน์ "รวม" ด้านบน -->
+            <div class="w-20"></div> <!-- ชดเชยช่อง 'จำนวน' -->
+            <div class="w-20"></div> <!-- ชดเชยช่อง 'ตัวเลขวัน' -->
+            <div class="w-8"></div> <!-- ชดเชยช่อง 'วัน' -->
+            <span class="w-10 text-center flex-shrink-0">รวม</span>
+            <span contenteditable="true"
+              class="editable-field w-28 text-right pr-2 border-b border-dotted border-gray-400"
+              id="doc-transportTotal">-</span>
+            <span class="w-8 text-right flex-shrink-0">บาท</span>
+          </div>
+
+          <!-- บรรทัดที่ 4: ค่าใช้จ่ายอื่น -->
+          <div class="flex items-end gap-1">
+            <span class="w-44 flex-shrink-0">ค่าใช้จ่ายอื่น</span>
+            <span contenteditable="true"
+              class="editable-field flex-1 text-center border-b border-dotted border-gray-400"
+              id="doc-otherExpense">-</span>
+            <!-- เว้นพื้นที่ให้ตรงกับคอลัมน์ "รวม" ด้านบน -->
+            <div class="w-20"></div>
+            <div class="w-20"></div>
+            <div class="w-8"></div>
+            <span class="w-10 text-center flex-shrink-0">รวม</span>
+            <span contenteditable="true"
+              class="editable-field w-28 text-right pr-2 border-b border-dotted border-gray-400"
+              id="doc-otherTotal">-</span>
+            <span class="w-8 text-right flex-shrink-0">บาท</span>
+          </div>
+
+          <!-- บรรทัดที่ 5: รวมเงินทั้งสิ้น -->
+          <div class="flex items-end w-full gap-1 mt-1">
+            <div class="flex-1"></div>
+            <!-- ใช้ w-10 เพื่อให้ขอบขวาของข้อความนี้ ตรงกับขอบขวาของคำว่า "รวม" ในบรรทัดบน -->
+            <span class="text-right pr-2 w-[65%] whitespace-nowrap flex-shrink-0">รวมเงินทั้งสิ้น</span>
+            <span contenteditable="true"
+              class="editable-field w-28 text-right pr-2 font-bold border-b border-dotted border-gray-400"
+              id="doc-grandTotal">-</span>
+            <span class="w-8 text-right flex-shrink-0">บาท</span>
+          </div>
+
+
+
+
+          <div class="flex items-end gap-1 mt-1">
+            <span class="w-32">จำนวนเงิน (ตัวอักษร)</span>
+            <span contenteditable="true" class="editable-field flex-1 text-center" id="doc-grandTotalWords">-</span>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-1.5 mb-6">
+          <div class="flex items-end gap-1 pl-16">
+            <span>ข้าพเจ้าขอรับรองว่ารายการที่กล่าวมาข้างต้นเป็นความจริง และหลักฐานการจ่ายที่ส่งมาด้วย</span>
+          </div>
+          <div class="flex items-end gap-1">
+            <span class="w-10">จำนวน</span>
+            <span contenteditable="true" class="editable-field w-16 text-center" id="doc-evidenceCount">-</span>
+            <span>ฉบับ รวมทั้งจำนวนเงินที่ขอเบิกถูกต้องตามกฎหมายทุกประการ</span>
+          </div>
+        </div>
+
+        <div class="flex justify-end mb-4">
+          <div class="w-1/2 flex flex-col gap-2 items-center pr-4">
+            <div class="flex items-end w-full">
+              <span class="w-10">ลงชื่อ</span>
+              <span contenteditable="true" class="editable-field flex-1 text-center"></span>
+              <span class="w-20 text-right">ผู้ขอรับเงิน</span>
+            </div>
+            <div class="flex items-end w-full justify-center pl-10 pr-20">
+              <span>(</span>
+              <span contenteditable="true" class="editable-field flex-1 text-center"
+                id="doc-signatureName">......................................................</span>
+              <span>)</span>
+            </div>
+            <div class="flex items-end w-full pr-20">
+              <span class="w-12">ตำแหน่ง</span>
+              <span contenteditable="true" class="editable-field flex-1 text-center"
+                id="doc-signaturePosition">......................................................</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="document2-page" class="page-content hidden py-4 px-2">
+      <div class="print-button-container max-w-4xl mx-auto mb-4 flex gap-2 justify-end">
+        <!--button onclick="downloadWord('document2-page', 'ใบเบิกค่าใช้จ่าย_ส่วนที่2.doc')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
+      📄 โหลด Word
+    </button-->
+        <!--button onclick="downloadPDF('document2-page', 'ใบเบิกค่าใช้จ่าย_ส่วนที่2.pdf')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
+      📑 โหลด PDF
+    </button-->
+        <button onclick="printDocument('document2-page')"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
+          🖨️ พิมพ์ส่วนที่ 2
+        </button>
+      </div>
+
+      <div class="print-container a4-paper text-[10pt] leading-tight text-black">
+
+        <div class="border-y border-black flex w-full mt-2">
+          <div class="w-1/2 border-r border-black p-3">
+            <div id="doc2-verify" class="mb-2"><span contenteditable="true"
+                class="editable-field w-full">ได้ตรวจสอบหลักฐานการเบิกจ่ายเงินที่แนบถูกต้องแล้ว</span></div>
+            <div id="doc2-decision" class="mb-4"><span contenteditable="true"
+                class="editable-field w-full">เห็นควรอนุมัติให้เบิกจ่ายได้</span></div>
+
+            <div class="mt-4 flex flex-col gap-1.5">
+              <div class="flex items-end">
+                <span class="w-12">ลงชื่อ</span>
+                <span contenteditable="true" class="editable-field flex-1 text-center"></span>
+              </div>
+              <div class="flex items-end justify-center">
+                <span>(</span>
+                <span contenteditable="true" class="editable-field decision-maker-name-display text-center w-56"></span>
+                <span>)</span>
+              </div>
+              <div class="flex items-end">
+                <span class="w-12">ตำแหน่ง</span>
+                <span contenteditable="true" class="editable-field decision-maker-position flex-1 text-center"></span>
+              </div>
+              <div class="flex items-end">
+                <span class="w-12">วันที่</span>
+                <span contenteditable="true" class="editable-field decision-maker-date flex-1 text-center"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="w-1/2 p-3">
+            <div class="mb-1 font-bold">อนุมัติให้จ่ายได้</div>
+            <div class="mb-4"><span class="text-transparent selection:text-black">.</span></div>
+
+            <div class="mt-4 flex flex-col gap-1.5">
+              <div class="flex items-end">
+                <span class="w-12">ลงชื่อ</span>
+                <span contenteditable="true" class="editable-field flex-1 text-center"></span>
+              </div>
+              <div class="flex items-end justify-center">
+                <span>(</span>
+                <span contenteditable="true" class="editable-field approver-name text-center w-56"></span>
+                <span>)</span>
+              </div>
+              <div class="flex items-end">
+                <span class="w-12">ตำแหน่ง</span>
+                <span contenteditable="true" class="editable-field approver-position flex-1 text-center"></span>
+              </div>
+              <div class="flex items-end">
+                <span class="w-12">วันที่</span>
+                <span contenteditable="true" class="editable-field approver-date flex-1 text-center"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="border-b border-black p-3 pb-4">
+          <div class="flex items-end gap-2 mb-2">
+            <span class="ml-12">ได้รับเงินค่าใช้จ่ายในการเดินทางไปราชการ จำนวน</span>
+            <span contenteditable="true" class="editable-field doc2-grandTotal flex-1 text-center font-bold"></span>
+            <span>บาท</span>
+          </div>
+          <div class="flex items-end gap-2 mb-4">
+            <span>(</span>
+            <span contenteditable="true" class="editable-field doc2-grandTotalWords flex-1 text-center"></span>
+            <span>) ไว้เป็นการถูกต้องแล้ว</span>
+          </div>
+
+          <div class="flex w-full mt-10 gap-4">
+            <div class="w-1/2 flex flex-col gap-1.5">
+              <div class="flex justify-between items-end">
+                <div class="flex items-end flex-1">
+                  <span class="w-10">ลงชื่อ</span>
+                  <span contenteditable="true" class="editable-field payee-receiver-sig flex-1 text-center"></span>
+                </div>
+                <span class="w-12 text-right">ผู้รับเงิน</span>
+              </div>
+              <div class="flex items-end justify-center">
+                <span>(</span>
+                <span contenteditable="true" class="editable-field payee-receiver-name text-center w-56"></span>
+                <span>)</span>
+              </div>
+              <div class="flex items-end">
+                <span class="w-14">ตำแหน่ง</span>
+                <span contenteditable="true" class="editable-field payee-receiver-pos flex-1 text-center"></span>
+              </div>
+              <div class="flex items-end">
+                <span class="w-10">วันที่</span>
+                <span contenteditable="true" class="editable-field payee-receiver-date flex-1 text-center"></span>
+              </div>
+              <div class="flex items-end mt-1 text-[14pt]">
+                <span class="whitespace-nowrap">จากเงินยืมตามสัญญาเลขที่</span>
+                <span contenteditable="true" class="editable-field doc2-loanNumber flex-1 text-center"></span>
+                <span class="whitespace-nowrap ml-1">วันที่</span>
+                <span contenteditable="true" class="editable-field doc2-loanDate w-72 text-center"></span>
+              </div>
+            </div>
+
+            <div class="w-1/2 flex flex-col gap-1.5">
+              <div class="flex justify-between items-end">
+                <div class="flex items-end flex-1">
+                  <span class="w-10">ลงชื่อ</span>
+                  <span contenteditable="true" class="editable-field verify-name flex-1 text-center"></span>
+                </div>
+                <span class="w-14 text-right">ผู้จ่ายเงิน</span>
+              </div>
+              <div class="flex items-end justify-center">
+                <span>(</span>
+                <span contenteditable="true" class="editable-field verify-name-display text-center w-56"></span>
+                <span>)</span>
+              </div>
+              <div class="flex items-end">
+                <span class="w-14">ตำแหน่ง</span>
+                <span contenteditable="true" class="editable-field verify-position flex-1 text-center"></span>
+              </div>
+              <div class="flex items-end">
+                <span class="w-10">วันที่</span>
+                <span contenteditable="true" class="editable-field verify-date flex-1 text-center"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex-1 p-3 w-full">
+          <div class="relative w-full h-[252px] leading-[28px] overflow-hidden">
+
+            <div class="absolute left-0 right-0 top-[-4.5px] z-0 pointer-events-none flex flex-col">
+              <div class="h-[28px] border-b border-dotted border-gray-400"></div>
+              <div class="h-[28px] border-b border-dotted border-gray-400"></div>
+              <div class="h-[28px] border-b border-dotted border-gray-400"></div>
+              <div class="h-[28px] border-b border-dotted border-gray-400"></div>
+              <div class="h-[28px] border-b border-dotted border-gray-400"></div>
+              <div class="h-[28px] border-b border-dotted border-gray-400"></div>
+              <div class="h-[28px] border-b border-dotted border-gray-400"></div>
+              <div class="h-[28px] border-b border-dotted border-gray-400"></div>
+              <div class="h-[28px] border-b border-dotted border-gray-400"></div>
+            </div>
+
+            <div class="relative z-10 w-full text-[15pt]">
+              <span class="font-bold mr-1 bg-white pr-2">หมายเหตุ</span>
+              <span contenteditable="true"
+                class="editable-field doc2-notes inline break-words whitespace-normal outline-none bg-transparent text-black text-left"></span>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="border-t-[3px] border-black pt-2 mt-auto text-[14pt]">
+          <div class="flex">
+            <span class="font-bold underline mr-2 whitespace-nowrap">คำชี้แจง</span>
+            <div class="flex-1 space-y-0.5 leading-tight">
+              <div class="flex gap-2">
+                <span>๑.</span>
+                <p>กรณีเดินทางเป็นหมู่คณะและจัดทำใบเบิกค่าใช้จ่ายรวมฉบับเดียวกัน
+                  หากระยะเวลาในการเริ่มต้นและสิ้นสุดการเดินทางของแต่ละบุคคลแตกต่างกัน
+                  ให้แสดงรายละเอียดของวันเวลาแตกต่างกันของบุคคลนั้นในช่องหมายเหตุ</p>
+              </div>
+              <div class="flex gap-2">
+                <span>๒.</span>
+                <p>กรณียื่นขอเบิกค่าใช้จ่ายรายบุคคล ให้ผู้ขอรับเงินเป็นผู้ลงลายมือชื่อผู้รับเงินและวันเดือนปีที่รับเงิน
+                  กรณีที่มีการยืมเงิน ให้ระบุวันที่ได้รับเงินยืม เลขที่สัญญายืม และวันที่อนุมัติเงินยืมด้วย</p>
+              </div>
+              <div class="flex gap-2">
+                <span>๓.</span>
+                <p>กรณีที่ยื่นขอเบิกค่าใช้จ่ายรวมเป็นหมู่คณะ ผู้ขอรับเงินต้องลงลายมือชื่อในช่องผู้รับเงิน ทั้งนี้
+                  ให้ผู้มีสิทธิแต่ละคนลงลายมือชื่อผู้รับเงินในหลักฐานการจ่ายเงิน (ส่วนที่ ๒)</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div id="document3-page" class="page-content hidden py-4 px-2">
+      <div class="print-button-container max-w-5xl mx-auto mb-4 flex gap-2 justify-end">
+        <button onclick="printDocument('document3-page', 'landscape')"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
+          🖨️ พิมพ์ส่วนที่ 3
+        </button>
+      </div>
+
+      <div class="print-container a4-landscape-paper text-[11pt] leading-tight text-black flex flex-col"
+        style="height: 210mm; overflow: hidden; font-family: 'THSarabunIT9', 'Sarabun', sans-serif;">
+
+        <div class="w-full text-right mb-1">
+          <span>แบบ ๘๗๐๘</span><br>
+          <span>ส่วนที่ ๒</span>
+        </div>
+
+        <div class="w-full text-center text-[11pt] mb-3">
+          <span>หลักฐานการจ่ายเงินค่าใช้จ่ายในการเดินทางไปราชการ</span>
+        </div>
+
+        <div class="flex flex-col gap-1 mb-3">
+          <div class="flex items-end gap-2">
+            <span>ชื่อส่วนราชการ</span>
+            <span contenteditable="true"
+              class="editable-field text-center flex-1 border-b border-dotted border-gray-400"
+              id="doc3-department"></span>
+            <span>จังหวัด</span>
+            <span contenteditable="true"
+              class="editable-field text-center w-[200px] border-b border-dotted border-gray-400"></span>
+          </div>
+          <div class="flex items-end gap-2 mt-1">
+            <span>ประกอบใบเบิกค่าใช้จ่ายในการเดินทางของ</span>
+            <span contenteditable="true"
+              class="editable-field text-center flex-1 border-b border-dotted border-gray-400"></span>
+            <span>ลงวันที่</span>
+            <span contenteditable="true"
+              class="editable-field text-center w-[100px] border-b border-dotted border-gray-400"></span>
+            <span>เดือน</span>
+            <span contenteditable="true"
+              class="editable-field text-center w-[150px] border-b border-dotted border-gray-400"></span>
+            <span>พ.ศ.</span>
+            <span contenteditable="true"
+              class="editable-field text-center w-[100px] border-b border-dotted border-gray-400"></span>
+          </div>
+        </div>
+
+        <table class="w-full border-collapse border border-black text-center mb-0 text-[11pt]">
+          <thead>
+            <tr>
+              <th class="border border-black font-normal p-1 w-4" rowspan="2">ลำดับ<br>ที่</th>
+              <th class="border border-black font-normal p-1 w-28" rowspan="2">ชื่อ</th>
+              <th class="border border-black font-normal p-1 w-24" rowspan="2">ตำแหน่ง</th>
+              <th class="border border-black font-normal p-1" colspan="4">ค่าใช้จ่าย</th>
+              <th class="border border-black font-normal p-1 w-24" rowspan="2">รวม</th>
+              <th class="border border-black font-normal p-1 w-20" rowspan="2">ลายมือชื่อ<br>ผู้รับเงิน</th>
+              <th class="border border-black font-normal p-1 w-20" rowspan="2">วัน เดือน ปี<br>ที่รับเงิน</th>
+              <th class="border border-black font-normal p-1 w-28" rowspan="2">หมายเหตุ</th>
+            </tr>
+            <tr>
+              <th class="border border-black font-normal p-1 w-20">ค่าเบี้ยเลี้ยง</th>
+              <th class="border border-black font-normal p-1 w-20">ค่าเช่าที่พัก</th>
+              <th class="border border-black font-normal p-1 w-20">ค่าพาหนะ</th>
+              <th class="border border-black font-normal p-1 w-20">ค่าใช้จ่ายอื่น</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="h-[30px] expense-row">
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+              <td
+                class="border border-black whitespace-normal break-words p-1 text-center align-middle leading-tight text-[9pt]"
+                contenteditable="true"></td>
+              <td
+                class="border border-black whitespace-normal break-words p-1 text-center align-middle leading-tight text-[9pt]"
+                contenteditable="true"></td>
+
+              <td class="border border-black expense-input meal-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td
+                class="border border-black expense-input lodging-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td
+                class="border border-black expense-input transport-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black expense-input other-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black row-total overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+            </tr>
+            <tr class="h-[30px] expense-row">
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+              <td
+                class="border border-black whitespace-normal break-words p-1 text-center align-middle leading-tight text-[9pt]"
+                contenteditable="true"></td>
+              <td
+                class="border border-black whitespace-normal break-words p-1 text-center align-middle leading-tight text-[9pt]"
+                contenteditable="true"></td>
+              <td class="border border-black expense-input meal-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td
+                class="border border-black expense-input lodging-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td
+                class="border border-black expense-input transport-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black expense-input other-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black row-total overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+            </tr>
+            <tr class="h-[30px] expense-row">
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+              <td
+                class="border border-black whitespace-normal break-words p-1 text-center align-middle leading-tight text-[9pt]"
+                contenteditable="true"></td>
+              <td
+                class="border border-black whitespace-normal break-words p-1 text-center align-middle leading-tight text-[9pt]"
+                contenteditable="true"></td>
+              <td class="border border-black expense-input meal-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td
+                class="border border-black expense-input lodging-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td
+                class="border border-black expense-input transport-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black expense-input other-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black row-total overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+            </tr>
+            <tr class="h-[30px] expense-row">
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+              <td
+                class="border border-black whitespace-normal break-words p-1 text-center align-middle leading-tight text-[9pt]"
+                contenteditable="true"></td>
+              <td
+                class="border border-black whitespace-normal break-words p-1 text-center align-middle leading-tight text-[9pt]"
+                contenteditable="true"></td>
+              <td class="border border-black expense-input meal-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td
+                class="border border-black expense-input lodging-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td
+                class="border border-black expense-input transport-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black expense-input other-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black row-total overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+            </tr>
+            <tr class="h-[30px] expense-row">
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+              <td
+                class="border border-black whitespace-normal break-words p-1 text-center align-middle leading-tight text-[9pt]"
+                contenteditable="true"></td>
+              <td
+                class="border border-black whitespace-normal break-words p-1 text-center align-middle leading-tight text-[9pt]"
+                contenteditable="true"></td>
+              <td class="border border-black expense-input meal-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td
+                class="border border-black expense-input lodging-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td
+                class="border border-black expense-input transport-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black expense-input other-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black row-total overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+            </tr>
+            <tr class="h-[30px] expense-row">
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+              <td
+                class="border border-black whitespace-normal break-words p-1 text-center align-middle leading-tight text-[9pt]"
+                contenteditable="true"></td>
+              <td
+                class="border border-black whitespace-normal break-words p-1 text-center align-middle leading-tight text-[9pt]"
+                contenteditable="true"></td>
+              <td class="border border-black expense-input meal-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td
+                class="border border-black expense-input lodging-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td
+                class="border border-black expense-input transport-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black expense-input other-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black row-total overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+            </tr>
+            <tr class="h-[30px] expense-row">
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+              <td
+                class="border border-black whitespace-normal break-words p-1 text-center align-middle leading-tight text-[9pt"
+                contenteditable="true"></td>
+              <td
+                class="border border-black whitespace-normal break-words p-1 text-center align-middle leading-tight text-[9pt]"
+                contenteditable="true"></td>
+              <td class="border border-black expense-input meal-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td
+                class="border border-black expense-input lodging-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td
+                class="border border-black expense-input transport-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black expense-input other-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black row-total overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+            </tr>
+            <tr class="h-[30px] expense-row">
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+              <td
+                class="border border-black whitespace-normal break-words p-1 text-center align-middle leading-tight text-[9pt]"
+                contenteditable="true"></td>
+              <td
+                class="border border-black whitespace-normal break-words p-1 text-center align-middle leading-tight text-[9pt]"
+                contenteditable="true"></td>
+              <td class="border border-black expense-input meal-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td
+                class="border border-black expense-input lodging-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td
+                class="border border-black expense-input transport-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black expense-input other-input overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black row-total overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+              <td class="border border-black overflow-hidden whitespace-nowrap text-ellipsis" contenteditable="true">
+              </td>
+            </tr>
+
+            <tr class="h-[32px] align-middle">
+              <td class="border border-black border-r-0 overflow-hidden whitespace-nowrap text-ellipsis"
+                contenteditable="true"></td>
+              <td class="border border-black border-l-0 text-right pr-4" colspan="2">รวมเงิน</td>
+              <td
+                class="border border-black text-center px-2 grand-meal-total overflow-hidden whitespace-nowrap text-ellipsis font-bold text-[11pt]"
+                contenteditable="true"></td>
+              <td
+                class="border border-black text-center px-2 grand-lodging-total overflow-hidden whitespace-nowrap text-ellipsis font-bold text-[11pt]"
+                contenteditable="true"></td>
+              <td
+                class="border border-black text-center px-2 grand-transport-total overflow-hidden whitespace-nowrap text-ellipsis font-bold text-[11pt]"
+                contenteditable="true"></td>
+              <td
+                class="border border-black text-center px-2 grand-other-total overflow-hidden whitespace-nowrap text-ellipsis font-bold text-[11pt]"
+                contenteditable="true"></td>
+              <td
+                class="border border-black text-center px-2 grand-total overflow-hidden whitespace-nowrap text-ellipsis font-bold text-[11pt]"
+                contenteditable="true"></td>
+              <td class="border-t border-black" colspan="3">
+                <div class="flex items-center px-2 text-[10pt] font-bold">
+                  <span>ตามสัญญาเงินยืมเลขที่</span>
+                  <span contenteditable="true"
+                    class="editable-field flex-1 text-center border-b border-dotted border-gray-400 text-[9pt]"></span>
+                  <span>วันที่</span>
+                  <span contenteditable="true"
+                    class="editable-field flex-1 text-center border-b border-dotted border-gray-400 text-[9pt]"></span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="flex justify-between items-start mt-4 pb-2">
+          <div class="flex items-end gap-2 w-[53.5%]">
+            <span>จำนวนเงินรวมทั้งสิ้น (ตัวอักษร)</span>
+            <span class="doc3-totalWords flex-1 text-center font-bold border-b border-dotted border-gray-400"
+              contenteditable="true">-</span>
+          </div>
+          <div class="w-[45%] flex flex-col items-center text-[11pt]">
+            <div class="flex items-end w-full mb-1">
+              <span class="w-12">ลงชื่อ</span>
+              <span contenteditable="true"
+                class="editable-field flex-1 text-center border-b border-dotted border-gray-400"></span>
+              <span class="w-20 text-right">ผู้จ่ายเงิน</span>
+            </div>
+            <div class="flex items-end w-full justify-center pl-12 pr-20 mb-1">
+              <span>(</span>
+              <span contenteditable="true"
+                class="editable-field text-center flex-1 border-b border-dotted border-gray-400 doc3-payerName"></span>
+              <span>)</span>
+            </div>
+            <div class="flex items-end w-full pr-20">
+              <span class="w-16">ตำแหน่ง</span>
+              <span contenteditable="true"
+                class="editable-field flex-1 text-center border-b border-dotted border-gray-400 doc3-payerPos"></span>
+            </div>
+            <div class="flex items-end w-full pr-20 mt-1">
+              <span class="w-16">วันที่</span>
+              <span contenteditable="true"
+                class="editable-field flex-1 text-center border-b border-dotted border-gray-400 doc3-payerDate"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-[11pt] leading-relaxed mt-2">
+          <p class="font-bold underline">คำชี้แจง</p>
+          <ol class="list-decimal list-inside pl-12 leading-relaxed" style="list-style-type: thai;">
+            <li>ค่าเบี้ยเลี้ยงและค่าเช่าที่พักให้ระบุอัตราวันและจำนวนวันที่ขอเบิกของแต่ละบุคคลในช่องหมายเหตุ</li>
+            <li>ให้ผู้มีสิทธิแต่ละคนเป็นผู้ลงลายมือชื่อผู้รับเงินและวันเดือนปีที่ได้รับเงิน
+              กรณีเป็นการรับจากเงินยืมให้ระบุวันที่ที่ได้รับเงินยืม</li>
+            <li>ผู้จ่ายเงินหมายถึงผู้ที่ขอยืมเงินจากทางราชการ และจ่ายเงินยืมนั้นให้แก่ผู้เดินทางแต่ละคน
+              เป็นผู้ลงลายมือชื่อผู้จ่ายเงิน</li>
+          </ol>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Page 4: Approval Form -->
+    <div id="approval-page" class="page-content hidden min-h-full py-6 px-4 bg-blue-100">
+      <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-2xl font-bold text-center mb-6 text-green-900">📋 ฟอร์มอนุมัติ</h1>
+        <form id="approval-form" class="space-y-6">
+          <!-- Section 1: Request Details -->
+          <fieldset class="border rounded-lg p-4 bg-pink-50">
+            <legend class="text-lg font-semibold text-blue-900 px-2">📋 รายละเอียดคำขออนุมัติ</legend>
+            <div class="grid grid-cols-1 gap-4 mt-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อผู้ขอ</label>
+                <input type="text" id="approvalRequesterName"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">ตำแหน่ง</label>
+                <input type="text" id="approvalRequesterPosition"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">จำนวนเงิน (บาท)</label>
+                <input type="number" id="approvalAmount"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">ช่วงเวลาการเดินทาง</label>
+                <input type="text" id="approvalTravelPeriod"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500">
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Section 2: Verification -->
+          <fieldset class="border rounded-lg p-4 bg-green-50">
+            <legend class="text-lg font-semibold text-green-900 px-2">✅ การตรวจสอบ</legend>
+            <div class="space-y-3 mt-4">
+              <label
+                class="flex items-start gap-3 p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-400">
+                <input type="checkbox" id="verifyDocuments" class="mt-1 w-4 h-4 text-green-600 rounded">
+                <div>
+                  <p class="font-medium text-gray-800">ตรวจสอบเอกสารที่บรรณบูรณ์</p>
+                  <p class="text-sm text-gray-600">หลักฐานการจ่ายชำระและเอกสารประกอบครบถ้วน</p>
+                </div>
+              </label>
+              <label
+                class="flex items-start gap-3 p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-400">
+                <input type="checkbox" id="verifyAmount" class="mt-1 w-4 h-4 text-green-600 rounded">
+                <div>
+                  <p class="font-medium text-gray-800">ตรวจสอบจำนวนเงิน</p>
+                  <p class="text-sm text-gray-600">จำนวนเงินถูกต้องตามกฎหมายและระเบียบ</p>
+                </div>
+              </label>
+              <label
+                class="flex items-start gap-3 p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:border-green-400">
+                <input type="checkbox" id="verifyLoan" class="mt-1 w-4 h-4 text-green-600 rounded">
+                <div>
+                  <p class="font-medium text-gray-800">ตรวจสอบการยืมเงิน</p>
+                  <p class="text-sm text-gray-600">เงินยืมสอดคล้องกับคำร้องขอเบิกค่าใช้จ่าย</p>
+                </div>
+              </label>
+            </div>
+
+            <!-- New Verifier Selection -->
+            <div class="grid grid-cols-1 gap-4 mt-6 pt-4 border-t border-green-200">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อผู้ตรวจสอบ</label>
+                <select id="verifierName"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  onchange="updateVerifierPosition()">
+                  <option value="">-- เลือก --</option>
+                  <option value="นางวรจิตร์ ปัญญาดี">นางวรจิตร์ ปัญญาดี</option>
+                  <option value="นาย กฤติเดช อุไพพร">นาย กฤติเดช อุไพพร</option>
+                  <option value="นางสาว สุดารัตน์ ผุยสุ">นางสาว สุดารัตน์ ผุยสุ</option>
+                  <option value="นางสาว รัฏธิดา วังศรี">นางสาว รัฏธิดา วังศรี</option>
+                  <option value="นาง มนัสนันท์ ชาเมืองศรี">นาง มนัสนันท์ ชาเมืองศรี</option>
+                  <option value="นาง วิยะดา นาระคล">นาง วิยะดา นาระคล</option>
+                  <option value="นางสาว สุเพ็ญศรี จันโทภาส">นางสาว สุเพ็ญศรี จันโทภาส</option>
+                  <option value="นาง จงกลณีย์ แสนสงคราม">นาง จงกลณีย์ แสนสงคราม</option>
+                  <option value="นางสาว ชลธิชา ทาระขันธ์">นางสาว ชลธิชา ทาระขันธ์</option>
+                  <option value="นางสาวพรรณลิณี แผนเมือง">นางสาวพรรณลิณี แผนเมือง</option>
+                  <option value="นาย คมสันต์ ล่องวิเชียร">นาย คมสันต์ ล่องวิเชียร</option>
+                  <option value="นาง สุจิรา เพชรเกื้อ">นาง สุจิรา เพชรเกื้อ</option>
+                  <option value="นาย ณรงค์ฤทธิ์ สุนีย์">นาย ณรงค์ฤทธิ์ สุนีย์</option>
+                  <option value="นางสาว สิริภรณ์ ค้าโชค">นางสาว สิริภรณ์ ค้าโชค</option>
+                  <option value="นางสาว ยลดา ชาวไทย">นางสาว ยลดา ชาวไทย</option>
+                  <option value="นาง จิราพร ศรีพิลา">นาง จิราพร ศรีพิลา</option>
+                  <option value="นางสาว พิตติภรณ์ จิรภัทร์ชนินทร์">นางสาว พิตติภรณ์ จิรภัทร์ชนินทร์</option>
+                  <option value="นางสาวศศิวิมล ใหมจันทร์">นางสาวศศิวิมล ใหมจันทร์</option>
+                  <option value="นายธนวัฒน์ อัคแก้ว">นายธนวัฒน์ อัคแก้ว</option>
+                  <option value="นางสาว อโณทัย ธนะสิทธิ์">นางสาว อโณทัย ธนะสิทธิ์</option>
+                  <option value="นางสาว ปิ่นกนก อุปพงษ์">นางสาว ปิ่นกนก อุปพงษ์</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">ตำแหน่ง</label>
+                <input type="text" id="verifierPosition"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  readonly>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">วันที่ตรวจสอบ (พ.ศ.)</label>
+                <div class="date-input-group">
+                  <div>
+                    <label>วัน</label>
+                    <input type="number" id="verifyDate_day" class="w-full" min="1" max="31">
+                  </div>
+                  <div>
+                    <label>เดือน</label>
+                    <select id="verifyDate_month">
+                      <option value="">-- เลือก --</option>
+                      <option value="มกราคม">มกราคม</option>
+                      <option value="กุมภาพันธ์">กุมภาพันธ์</option>
+                      <option value="มีนาคม">มีนาคม</option>
+                      <option value="เมษายน">เมษายน</option>
+                      <option value="พฤษภาคม">พฤษภาคม</option>
+                      <option value="มิถุนายน">มิถุนายน</option>
+                      <option value="กรกฎาคม">กรกฎาคม</option>
+                      <option value="สิงหาคม">สิงหาคม</option>
+                      <option value="กันยายน">กันยายน</option>
+                      <option value="ตุลาคม">ตุลาคม</option>
+                      <option value="พฤศจิกายน">พฤศจิกายน</option>
+                      <option value="ธันวาคม">ธันวาคม</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label>ปี พ.ศ.</label>
+                    <input type="number" id="verifyDate_year" class="w-full" min="2500" max="2700">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Section 3: Decision -->
+          <fieldset class="border rounded-lg p-4 bg-yellow-50">
+            <legend class="text-lg font-semibold text-yellow-900 px-2">🎯 การพิจารณา</legend>
+            <div class="space-y-4 mt-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-3">ผลการพิจารณา:</label>
+                <div class="space-y-2">
+                  <label
+                    class="flex items-center gap-3 p-3 bg-white rounded-lg border border-green-200 cursor-pointer hover:border-green-400">
+                    <input type="radio" name="approvalDecision" value="approved" class="w-4 h-4 text-green-600">
+                    <span class="font-medium text-green-800">✅ เห็นควรอนุมัติให้เบิกจ่ายได้</span>
+                  </label>
+                  <label
+                    class="flex items-center gap-3 p-3 bg-white rounded-lg border border-red-200 cursor-pointer hover:border-red-400">
+                    <input type="radio" name="approvalDecision" value="rejected" class="w-4 h-4 text-red-600">
+                    <span class="font-medium text-red-800">❌ ไม่อนุมัติ</span>
+                  </label>
+                  <label
+                    class="flex items-center gap-3 p-3 bg-white rounded-lg border border-orange-200 cursor-pointer hover:border-orange-400">
+                    <input type="radio" name="approvalDecision" value="pending" class="w-4 h-4 text-orange-600">
+                    <span class="font-medium text-orange-800">⏳ ส่งกลับแก้ไข / เพิ่มเติมเอกสาร</span>
+                  </label>
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">หมายเหตุเพิ่มเติม</label>
+                <textarea id="approvalNotes" rows="3"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="ระบุเหตุผลหรือข้อความเพิ่มเติม..."></textarea>
+              </div>
+
+              <!-- Decision Maker Info -->
+              <div class="grid grid-cols-1 gap-4 mt-6 pt-4 border-t border-yellow-200">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อผู้พิจารณา</label>
+                  <select id="decisionMakerName"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                    onchange="updateDecisionMakerPosition()">
+                    <option value="">-- เลือก --</option>
+                    <option value="นางวรจิตร์ ปัญญาดี">นางวรจิตร์ ปัญญาดี</option>
+                    <option value="นาย กฤติเดช อุไพพร">นาย กฤติเดช อุไพพร</option>
+                    <option value="นางสาว สุดารัตน์ ผุยสุ">นางสาว สุดารัตน์ ผุยสุ</option>
+                    <option value="นางสาว รัฏธิดา วังศรี">นางสาว รัฏธิดา วังศรี</option>
+                    <option value="นาง มนัสนันท์ ชาเมืองศรี">นาง มนัสนันท์ ชาเมืองศรี</option>
+                    <option value="นาง วิยะดา นาระคล">นาง วิยะดา นาระคล</option>
+                    <option value="นางสาว สุเพ็ญศรี จันโทภาส">นางสาว สุเพ็ญศรี จันโทภาส</option>
+                    <option value="นาง จงกลณีย์ แสนสงคราม">นาง จงกลณีย์ แสนสงคราม</option>
+                    <option value="นางสาว ชลธิชา ทาระขันธ์">นางสาว ชลธิชา ทาระขันธ์</option>
+                    <option value="นางสาวพรรณลิณี แผนเมือง">นางสาวพรรณลิณี แผนเมือง</option>
+                    <option value="นาย คมสันต์ ล่องวิเชียร">นาย คมสันต์ ล่องวิเชียร</option>
+                    <option value="นาง สุจิรา เพชรเกื้อ">นาง สุจิรา เพชรเกื้อ</option>
+                    <option value="นาย ณรงค์ฤทธิ์ สุนีย์">นาย ณรงค์ฤทธิ์ สุนีย์</option>
+                    <option value="นางสาว สิริภรณ์ ค้าโชค">นางสาว สิริภรณ์ ค้าโชค</option>
+                    <option value="นางสาว ยลดา ชาวไทย">นางสาว ยลดา ชาวไทย</option>
+                    <option value="นาง จิราพร ศรีพิลา">นาง จิราพร ศรีพิลา</option>
+                    <option value="นางสาว พิตติภรณ์ จิรภัทร์ชนินทร์">นางสาว พิตติภรณ์ จิรภัทร์ชนินทร์</option>
+                    <option value="นางสาวศศิวิมล ใหมจันทร์">นางสาวศศิวิมล ใหมจันทร์</option>
+                    <option value="นายธนวัฒน์ อัคแก้ว">นายธนวัฒน์ อัคแก้ว</option>
+                    <option value="นางสาว อโณทัย ธนะสิทธิ์">นางสาว อโณทัย ธนะสิทธิ์</option>
+                    <option value="นางสาว ปิ่นกนก อุปพงษ์">นางสาว ปิ่นกนก อุปพงษ์</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">ตำแหน่ง</label>
+                  <input type="text" id="decisionMakerPosition"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                    readonly>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">วันที่พิจารณา (พ.ศ.)</label>
+                  <div class="date-input-group">
+                    <div>
+                      <label>วัน</label>
+                      <input type="number" id="decisionDate_day" class="w-full" min="1" max="31">
+                    </div>
+                    <div>
+                      <label>เดือน</label>
+                      <select id="decisionDate_month">
+                        <option value="">-- เลือก --</option>
+                        <option value="มกราคม">มกราคม</option>
+                        <option value="กุมภาพันธ์">กุมภาพันธ์</option>
+                        <option value="มีนาคม">มีนาคม</option>
+                        <option value="เมษายน">เมษายน</option>
+                        <option value="พฤษภาคม">พฤษภาคม</option>
+                        <option value="มิถุนายน">มิถุนายน</option>
+                        <option value="กรกฎาคม">กรกฎาคม</option>
+                        <option value="สิงหาคม">สิงหาคม</option>
+                        <option value="กันยายน">กันยายน</option>
+                        <option value="ตุลาคม">ตุลาคม</option>
+                        <option value="พฤศจิกายน">พฤศจิกายน</option>
+                        <option value="ธันวาคม">ธันวาคม</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label>ปี พ.ศ.</label>
+                      <input type="number" id="decisionDate_year" class="w-full" min="2500" max="2700">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Section 4: Approver Info -->
+          <fieldset class="border rounded-lg p-4 bg-indigo-50">
+            <legend class="text-lg font-semibold text-indigo-900 px-2">👤 ผู้อนุมัติ</legend>
+            <div class="grid grid-cols-1 gap-4 mt-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อผู้อนุมัติ</label>
+                <select id="approverName"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  onchange="updateApproverPosition()">
+                  <option value="">-- เลือก --</option>
+                  <option value="นางวรจิตร์ ปัญญาดี">นางวรจิตร์ ปัญญาดี</option>
+                  <option value="นาย กฤติเดช อุไพพร">นาย กฤติเดช อุไพพร</option>
+                  <option value="นางสาว สุดารัตน์ ผุยสุ">นางสาว สุดารัตน์ ผุยสุ</option>
+                  <option value="นางสาว รัฏธิดา วังศรี">นางสาว รัฏธิดา วังศรี</option>
+                  <option value="นาง มนัสนันท์ ชาเมืองศรี">นาง มนัสนันท์ ชาเมืองศรี</option>
+                  <option value="นาง วิยะดา นาระคล">นาง วิยะดา นาระคล</option>
+                  <option value="นางสาว สุเพ็ญศรี จันโทภาส">นางสาว สุเพ็ญศรี จันโทภาส</option>
+                  <option value="นาง จงกลณีย์ แสนสงคราม">นาง จงกลณีย์ แสนสงคราม</option>
+                  <option value="นางสาว ชลธิชา ทาระขันธ์">นางสาว ชลธิชา ทาระขันธ์</option>
+                  <option value="นางสาวพรรณลิณี แผนเมือง">นางสาวพรรณลิณี แผนเมือง</option>
+                  <option value="นาย คมสันต์ ล่องวิเชียร">นาย คมสันต์ ล่องวิเชียร</option>
+                  <option value="นาง สุจิรา เพชรเกื้อ">นาง สุจิรา เพชรเกื้อ</option>
+                  <option value="นาย ณรงค์ฤทธิ์ สุนีย์">นาย ณรงค์ฤทธิ์ สุนีย์</option>
+                  <option value="นางสาว สิริภรณ์ ค้าโชค">นางสาว สิริภรณ์ ค้าโชค</option>
+                  <option value="นางสาว ยลดา ชาวไทย">นางสาว ยลดา ชาวไทย</option>
+                  <option value="นาง จิราพร ศรีพิลา">นาง จิราพร ศรีพิลา</option>
+                  <option value="นางสาว พิตติภรณ์ จิรภัทร์ชนินทร์">นางสาว พิตติภรณ์ จิรภัทร์ชนินทร์</option>
+                  <option value="นางสาวศศิวิมล ใหมจันทร์">นางสาวศศิวิมล ใหมจันทร์</option>
+                  <option value="นายธนวัฒน์ อัคแก้ว">นายธนวัฒน์ อัคแก้ว</option>
+                  <option value="นางสาว อโณทัย ธนะสิทธิ์">นางสาว อโณทัย ธนะสิทธิ์</option>
+                  <option value="นางสาว ปิ่นกนก อุปพงษ์">นางสาว ปิ่นกนก อุปพงษ์</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">ตำแหน่ง</label>
+                <input type="text" id="approverPosition"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  readonly>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">วันที่อนุมัติ (พ.ศ.)</label>
+                <div class="date-input-group">
+                  <div>
+                    <label>วัน</label>
+                    <input type="number" id="approvalDate_day" class="w-full" min="1" max="31">
+                  </div>
+                  <div>
+                    <label>เดือน</label>
+                    <select id="approvalDate_month">
+                      <option value="">-- เลือก --</option>
+                      <option value="มกราคม">มกราคม</option>
+                      <option value="กุมภาพันธ์">กุมภาพันธ์</option>
+                      <option value="มีนาคม">มีนาคม</option>
+                      <option value="เมษายน">เมษายน</option>
+                      <option value="พฤษภาคม">พฤษภาคม</option>
+                      <option value="มิถุนายน">มิถุนายน</option>
+                      <option value="กรกฎาคม">กรกฎาคม</option>
+                      <option value="สิงหาคม">สิงหาคม</option>
+                      <option value="กันยายน">กันยายน</option>
+                      <option value="ตุลาคม">ตุลาคม</option>
+                      <option value="พฤศจิกายน">พฤศจิกายน</option>
+                      <option value="ธันวาคม">ธันวาคม</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label>ปี พ.ศ.</label>
+                    <input type="number" id="approvalDate_year" class="w-full" min="2500" max="2700">
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </fieldset>
+
+
+
+          <!-- Buttons -->
+          <div class="flex gap-3 justify-center">
+            <button type="submit"
+              class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg> บันทึกการอนุมัติ </button>
+            <button type="button" onclick="clearApprovalForm()"
+              class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-lg font-semibold transition-colors">
+              ล้างฟอร์ม </button>
+          </div>
+        </form>
+        <div id="approval-message" class="mt-4 p-3 rounded hidden text-center font-semibold"></div>
+      </div>
+      <div class="text-center py-6">
+        <p class="text-gray-500 text-lg font-bold">👨‍💻 พัฒนาโดย นางสาวพรรณลิณี แผนเมือง</p>
+        <p class="text-gray-400 text-sm font-bold">นักวิชาการเงินและบัญชี</p>
+        <!--p class="text-gray-400 text-sm font-bold">กลุ่มงานวิชาการ</p-->
+        <p class="text-gray-500 text-lg font-bold">👨‍💻 ผู้ร่วมทีมพัฒนา นางสาวอาลิตา เชาวนประเสริฐ</p>
+        <p class="text-gray-400 text-sm font-bold">นักจัดการงานทั่วไปปฏิบัติการ</p>
+        <!--p class="text-gray-400 text-sm">สำนักงานคลังจังหวัดสกลนคร</p-->
+      </div>
+    </div>
+
+    <!-- Page 5: Tracking & Status -->
+    <div id="tracking-page" class="page-content hidden min-h-full py-6 px-4 bg-blue-100">
+      <div class="max-w-4xl mx-auto">
+        <!-- Status Summary Section -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-blue-500">
+            <h3 class="text-gray-600 text-sm font-medium mb-2">📋 สถานะปัจจุบัน</h3>
+            <p id="current-status" class="text-2xl font-bold text-blue-600">รอการบันทึก</p>
+          </div>
+          <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-orange-500">
+            <h3 class="text-gray-600 text-sm font-medium mb-2">💰 จำนวนเงิน</h3>
+            <p id="total-amount" class="text-2xl font-bold text-orange-600">0 บาท</p>
+          </div>
+          <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-green-500">
+            <h3 class="text-gray-600 text-sm font-medium mb-2">👤 ผู้ยื่นคำขอ</h3>
+            <p id="requester-name" class="text-lg font-bold text-green-600">-</p>
+          </div>
+        </div>
+
+        <div class="flex justify-end mb-4">
+          <button onclick="downloadHistoryCSV()"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-md">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg> ดาวน์โหลดประวัติ (CSV) </button>
+        </div>
+
+        <!-- Timeline Section -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+          <h2 class="text-xl font-bold mb-6 text-gray-800">⏱️ ไทม์ไลน์การประมวลผล</h2>
+          <div id="timeline-container">
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div>
+                <p class="font-semibold text-gray-800">📝 รอการบันทึกข้อมูล</p>
+                <p class="text-sm text-gray-600">กรุณากรอกแบบฟอร์มและบันทึกข้อมูล</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div>
+                <p class="font-semibold text-gray-800">✅ รอการอนุมัติ</p>
+                <p class="text-sm text-gray-600">ระบบรอการลงนามจากผู้อนุมัติ</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div>
+                <p class="font-semibold text-gray-800">📄 เสร็จสิ้น</p>
+                <p class="text-sm text-gray-600">กระบวนการอนุมัติเสร็จสิ้น</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- History Section -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+          <h2 class="text-xl font-bold mb-6 text-gray-800">📜 ประวัติการทำรายการ</h2>
+          <div id="history-container">
+            <div class="text-center py-12">
+              <p class="text-gray-500 text-lg">ยังไม่มีประวัติการทำรายการ</p>
+              <p class="text-gray-400 text-sm">กระบวนการจะถูกบันทึกเมื่อคุณบันทึกข้อมูล</p>
+            </div>
+          </div>
+        </div>
+        <div class="text-center py-6">
+          <p class="text-gray-500 text-lg font-bold">👨‍💻 พัฒนาโดย นางสาวพรรณลิณี แผนเมือง</p>
+          <p class="text-gray-400 text-sm font-bold">นักวิชาการเงินและบัญชี</p>
+          <!--p class="text-gray-400 text-sm font-bold">กลุ่มงานวิชาการ</p-->
+          <p class="text-gray-500 text-lg font-bold">👨‍💻 ผู้ร่วมทีมพัฒนา นางสาวอาลิตา เชาวนประเสริฐ</p>
+          <p class="text-gray-400 text-sm font-bold">นักจัดการงานทั่วไปปฏิบัติการ</p>
+          <!--p class="text-gray-400 text-sm">สำนักงานคลังจังหวัดสกลนคร</p-->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Page 6: Handbook -->
+    <div id="handbook-page" class="page-content hidden min-h-full bg-gray-100 flex overflow-hidden"
+      style="height: calc(100vh - 64px);">
+      <!-- Sidebar Navigation -->
+      <div class="w-72 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col shadow-lg overflow-y-auto">
+        <div class="p-6 border-b border-gray-100 bg-blue-50">
+          <h2 class="text-xl font-bold text-blue-900 flex items-center gap-2">
+            📕 สารบัญคู่มือ
+          </h2>
+          <p class="text-xs text-blue-600 mt-1">คลิกเพื่อไปยังหน้าต่างๆ ของคู่มือ</p>
+        </div>
+        <div class="p-3 space-y-1">
+          <!-- Chapter 1 -->
+          <div>
+            <button onclick="jumpToPDFPage(4)"
+              class="w-full text-left px-4 py-3 rounded-lg hover:bg-blue-50 text-blue-900 font-bold transition-all flex justify-between items-center border-l-4 border-transparent hover:border-blue-600 group">
+              <span>บทที่ ๑ : บทนำ</span>
+              <span
+                class="text-xs text-blue-500 bg-blue-100 px-2 py-0.5 rounded-full group-hover:bg-blue-600 group-hover:text-white transition-colors">หน้า
+                ๔</span>
+            </button>
+            <div class="ml-4 mt-1 space-y-1 border-l border-blue-100 pl-2">
+              <button onclick="jumpToPDFPage(4)"
+                class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-gray-50 text-gray-600 text-sm transition-colors hover:text-blue-600">
+                - ความสำคัญและที่มา
+              </button>
+              <button onclick="jumpToPDFPage(5)"
+                class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-gray-50 text-gray-600 text-sm transition-colors hover:text-blue-600">
+                - วัตถุประสงค์
+              </button>
+            </div>
+            <div class="ml-4 mt-1 space-y-1 border-l border-blue-100 pl-2">
+              <button onclick="jumpToPDFPage(5)"
+                class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-gray-50 text-gray-600 text-sm transition-colors hover:text-blue-600">
+                - ขอบเขตเนื้อหาวิชา
+              </button>
+              <button onclick="jumpToPDFPage(5)"
+                class="w-full text-left px-3 py-1.5 rounded-lg hover:bg-gray-50 text-gray-600 text-sm transition-colors hover:text-blue-600">
+                - ประโยชน์ที่จะได้รับ
+              </button>
+            </div>
+          </div>
+
+          <!-- Chapter 2 -->
+          <button onclick="jumpToPDFPage(6)"
+            class="w-full text-left px-4 py-3 rounded-lg hover:bg-blue-50 text-blue-900 font-bold transition-all flex justify-between items-center border-l-4 border-transparent hover:border-blue-600 group mt-2">
+            <span>บทที่ ๒ : สาระสำคัญ กม.</span>
+            <span
+              class="text-xs text-blue-500 bg-blue-100 px-2 py-0.5 rounded-full group-hover:bg-blue-600 group-hover:text-white transition-colors">หน้า
+              ๖</span>
+          </button>
+
+          <!-- Chapter 3 -->
+          <button onclick="jumpToPDFPage(59)"
+            class="w-full text-left px-4 py-3 rounded-lg hover:bg-blue-50 text-blue-900 font-bold transition-all flex justify-between items-center border-l-4 border-transparent hover:border-blue-600 group mt-2">
+            <span>บทที่ ๓ : แนวทางปฏิบัติ</span>
+            <span
+              class="text-xs text-blue-500 bg-blue-100 px-2 py-0.5 rounded-full group-hover:bg-blue-600 group-hover:text-white transition-colors">หน้า
+              ๕๙</span>
+          </button>
+
+          <!-- Chapter 4 -->
+          <button onclick="jumpToPDFPage(80)"
+            class="w-full text-left px-4 py-3 rounded-lg hover:bg-blue-50 text-blue-900 font-bold transition-all flex justify-between items-center border-l-4 border-transparent hover:border-blue-600 group mt-2">
+            <span>บทที่ ๔ : บทสรุป</span>
+            <span
+              class="text-xs text-blue-500 bg-blue-100 px-2 py-0.5 rounded-full group-hover:bg-blue-600 group-hover:text-white transition-colors">หน้า
+              ๘๐</span>
+          </button>
+
+          <!-- Chapter 5 -->
+          <button onclick="jumpToPDFPage(89)"
+            class="w-full text-left px-4 py-3 rounded-lg hover:bg-blue-50 text-blue-900 font-bold transition-all flex justify-between items-center border-l-4 border-transparent hover:border-blue-600 group mt-2">
+            <span>บทที่ ๕ : ถาม - ตอบ</span>
+            <span
+              class="text-xs text-blue-500 bg-blue-100 px-2 py-0.5 rounded-full group-hover:bg-blue-600 group-hover:text-white transition-colors">หน้า
+              ๘๙</span>
+          </button>
+        </div>
+      </div>
+      <!-- PDF View Container -->
+      <div class="flex-1 bg-gray-200 relative">
+        <iframe id="handbook-iframe" src="Handbook.pdf#view=FitH"
+          class="w-full h-full border-none shadow-inner"></iframe>
+      </div>
+      </div-->
+    </div>
+
+    <script>
+      // Staff position mapping
+      const staffPositions = {
+        'นางวรจิตร์ ปัญญาดี': 'คลังจังหวัดสกลนคร',
+        'นาย กฤติเดช อุไพพร': 'เจ้าพนักงานธุรการชำนาญงาน',
+        'นางสาว สุดารัตน์ ผุยสุ': 'เจ้าหน้าที่การคลัง',
+        'นางสาว รัฏธิดา วังศรี': 'นักวิชาการคลัง',
+        'นาง มนัสนันท์ ชาเมืองศรี': 'นักวิชาการคลังชำนาญการพิเศษ',
+        'นาง วิยะดา นาระคล': 'นักวิชาการเงินและบัญชีชำนาญการ',
+        'นางสาว สุเพ็ญศรี จันโทภาส': 'นักวิชาการคลังชำนาญการ',
+        'นาง จงกลณีย์ แสนสงคราม': 'นักวิชาการคลังชำนาญการ',
+        'นางสาว ชลธิชา ทาระขันธ์': 'นักวิชาการคลังปฏิบัติการ',
+        'นางสาวพรรณลิณี แผนเมือง': 'นักวิชาการเงินและบัญชี',
+        'นาย คมสันต์ ล่องวิเชียร': 'นักวิชาการคลังชำนาญการพิเศษ',
+        'นาง สุจิรา เพชรเกื้อ': 'นักวิชาการเงินและบัญชีชำนาญการ',
+        'นาย ณรงค์ฤทธิ์ สุนีย์': 'เจ้าพนักงานการคลังชำนาญงาน',
+        'นางสาว สิริภรณ์ ค้าโชค': 'นักวิชาการคลังปฏิบัติการ',
+        'นางสาว ยลดา ชาวไทย': 'นักวิชาการเงินและบัญชีปฏิบัติการ',
+        'นาง จิราพร ศรีพิลา': 'เจ้าหน้าที่การคลัง',
+        'นางสาว พิตติภรณ์ จิรภัทร์ชนินทร์': 'นักวิชาการเงินและบัญชีชำนาญการ',
+        'นางสาวศศิวิมล ใหมจันทร์': 'นักวิชาการคลังปฏิบัติการ',
+        'นายธนวัฒน์ อัคแก้ว': 'นักวิชาการคลังปฏิบัติการ',
+        'นางสาว อโณทัย ธนะสิทธิ์': 'นักวิชาการคลัง',
+        'นางสาว นนน อุปพงษ์': 'เจ้าหน้าที่คลัง'
+      };
+
+      let allRecords = [];
+      let trackingHistory = [];
+      let approvalData = null;
+
+      // ฟังก์ชัน localStorage สำหรับบันทึกข้อมูล
+      function saveToLocalStorage() {
+        try {
+          localStorage.setItem('allRecords', JSON.stringify(allRecords));
+          localStorage.setItem('approvalData', JSON.stringify(approvalData));
+          localStorage.setItem('trackingHistory', JSON.stringify(trackingHistory));
+        } catch (e) {
+          console.error('Error saving to localStorage:', e);
+        }
+      }
+
+      // ฟังก์ชันโหลดข้อมูลจาก localStorage
+      function loadFromLocalStorage() {
+        try {
+          const savedRecords = localStorage.getItem('allRecords');
+          const savedApproval = localStorage.getItem('approvalData');
+          const savedHistory = localStorage.getItem('trackingHistory');
+
+          if (savedRecords) {
+            allRecords = JSON.parse(savedRecords);
+          }
+          if (savedApproval) {
+            approvalData = JSON.parse(savedApproval);
+          }
+          if (savedHistory) {
+            trackingHistory = JSON.parse(savedHistory);
+          }
+        } catch (e) {
+          console.error('Error loading from localStorage:', e);
+        }
+      }
+
+      // ฟังก์ชันลบข้อมูลทั้งหมด
+      function clearAllData() {
+        try {
+          localStorage.removeItem('allRecords');
+          localStorage.removeItem('approvalData');
+          localStorage.removeItem('trackingHistory');
+          allRecords = [];
+          approvalData = null;
+          trackingHistory = [];
+        } catch (e) {
+          console.error('Error clearing localStorage:', e);
+        }
+      }
+
+      // ฟังก์ชันสำหรับดาวน์โหลด CSV
+      function downloadHistoryCSV() {
+        if (allRecords.length === 0) {
+          alert('ไม่มีข้อมูลสำหรับดาวน์โหลด');
+          return;
+        }
+
+        // เตรียมหัวข้อ CSV
+        const headers = [
+          'เลขที่สัญญา', 'วันที่สัญญา', 'ชื่อผู้ยืม', 'จำนวนเงินยืม',
+          'ชื่อผู้ขอเบิก', 'ตำแหน่ง', 'สำนัก/กอง', 'วัตถุประสงค์',
+          'วันเริ่มเดินทาง', 'วันสิ้นสุด', 'รวมจำนวนวัน', 'รวมจำนวนชั่วโมง',
+          'รวมเงินทั้งสิ้น', 'สถานะการอนุมัติ', 'ผู้อนุมัติ', 'วันที่อนุมัติ'
+        ];
+
+        // เตรียมข้อมูล
+        const rows = allRecords.map(record => {
+          const status = approvalData ? (approvalData.decision === 'approved' ? 'อนุมัติแล้ว' : approvalData.decision === 'rejected' ? 'ไม่อนุมัติ' : 'รอการแก้ไข') : 'รอการอนุมัติ';
+          return [
+            record.loanNumber || '-',
+            record.loanDate || '-',
+            record.borrowerName || '-',
+            record.borrowerAmount || '0',
+            record.fullName || '-',
+            record.position || '-',
+            record.office || '-',
+            record.travelPurpose || '-',
+            `${record.startDate}/${record.startMonth}/${record.startYear}`,
+            `${record.endDate}/${record.endMonth}/${record.endYear}`,
+            record.totalDays || '0',
+            record.totalHours || '0',
+            record.grandTotal || '0',
+            status,
+            approvalData ? approvalData.approverName : '-',
+            approvalData ? approvalData.timestamp : '-'
+          ];
+        });
+
+        // สร้างเนื้อหา CSV
+        let csvContent = "\uFEFF"; // เพิ่ม BOM สำหรับภาษาไทยใน Excel
+        csvContent += headers.join(",") + "\n";
+        rows.forEach(row => {
+          const escapedRow = row.map(val => `"${val.toString().replace(/"/g, '""')}"`);
+          csvContent += escapedRow.join(",") + "\n";
+        });
+
+        // สร้างไฟล์สำหรับดาวน์โหลด
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `travel_history_${new Date().getTime()}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      const defaultConfig = {
+        document_title: 'ใบเบิกค่าใช้จ่ายในการเดินทางไปราชการ'
+      };
+
+      function updatePosition() {
+        const name = document.getElementById('fullName').value;
+        const position = staffPositions[name] || '';
+        document.getElementById('position').value = position;
+        updateDocumentFromData(getFormData());
+      }
+
+      function updateSignaturePosition() {
+        const name = document.getElementById('signatureName').value;
+        const position = staffPositions[name] || '';
+        document.getElementById('signaturePosition').value = position;
+      }
+
+      function updateApproverPosition() {
+        const name = document.getElementById('approverName').value;
+        const position = staffPositions[name] || '';
+        document.getElementById('approverPosition').value = position;
+        syncApprovalToDocument2();
+      }
+
+      function updateVerifierPosition() {
+        const name = document.getElementById('verifierName').value;
+        const position = staffPositions[name] || '';
+        document.getElementById('verifierPosition').value = position;
+        syncApprovalToDocument2();
+      }
+
+      function updateDecisionMakerPosition() {
+        const name = document.getElementById('decisionMakerName').value;
+        const position = staffPositions[name] || '';
+        document.getElementById('decisionMakerPosition').value = position;
+        syncApprovalToDocument2();
+      }
+
+      function initializeDateSelectors() {
+        const daySelects = document.querySelectorAll('select[id$="Date"]');
+        daySelects.forEach(select => {
+          for (let i = 1; i <= 31; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            select.appendChild(option);
+          }
+        });
+
+        const yearSelects = document.querySelectorAll('select[id$="Year"]');
+        const currentYear = new Date().getFullYear() + 543;
+        yearSelects.forEach(select => {
+          for (let i = currentYear - 5; i <= currentYear + 5; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            select.appendChild(option);
+          }
+        });
+      }
+
+      function showPage(page) {
+        document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
+        document.getElementById(page + '-page').classList.remove('hidden');
+        document.querySelectorAll('.page-tab').forEach(el => {
+          if (el.dataset.page === page) {
+            el.classList.add('border-blue-600', 'text-blue-600');
+            el.classList.remove('border-transparent', 'text-gray-600');
+          } else {
+            el.classList.remove('border-blue-600', 'text-blue-600');
+            el.classList.add('border-transparent', 'text-gray-600');
+          }
+        });
+        if (page === 'approval') {
+          loadApprovalForm();
+        }
+        if (page === 'tracking') {
+          updateTrackingStatus();
+        }
+      }
+
+      function jumpToPDFPage(page) {
+        const iframe = document.getElementById('handbook-iframe');
+        if (iframe) {
+          const newUrl = `Handbook.pdf#page=${page}&view=FitH`;
+          // ใช้การสร้าง iframe ใหม่เพื่อแก้ปัญหา Browser บางตัวไม่ยอมกระโดดหน้าเมื่อเปลี่ยนแค่ Hash
+          const parent = iframe.parentNode;
+          const newIframe = document.createElement('iframe');
+          newIframe.id = 'handbook-iframe';
+          newIframe.src = newUrl;
+          newIframe.className = 'w-full h-full border-none shadow-inner';
+
+          parent.replaceChild(newIframe, iframe);
+        }
+      }
+
+      function printDocument(pageId, orientation = 'portrait') {
+        // 1. สร้างแท็ก style ชั่วคราวเพื่อบอกเครื่องปริ้นท์ว่าเอา แนวตั้ง หรือ แนวนอน
+        const style = document.createElement('style');
+        style.innerHTML = `@page { size: A4 ${orientation}; margin: 0; }`;
+        document.head.appendChild(style);
+
+        // 2. สั่งพิมพ์ (เหมือนกด Ctrl+P)
+        window.print();
+
+        // 3. พิมพ์เสร็จก็ลบการตั้งค่าทิ้ง เพื่อไม่ให้กระทบหน้าอื่น
+        style.remove();
+      }
+
+      function calculateTravelTime() {
+        const startDateInput = document.getElementById('startDate').value;
+        const startMonthInput = document.getElementById('startMonth').value;
+        const startYearInput = document.getElementById('startYear').value;
+        const startTimeInput = document.getElementById('startTime').value;
+        const endDateInput = document.getElementById('endDate').value;
+        const endMonthInput = document.getElementById('endMonth').value;
+        const endYearInput = document.getElementById('endYear').value;
+        const endTimeInput = document.getElementById('endTime').value;
+
+        if (startDateInput && startYearInput && endDateInput && endYearInput) {
+          const monthMap = {
+            'มกราคม': 1, 'กุมภาพันธ์': 2, 'มีนาคม': 3, 'เมษายน': 4,
+            'พฤษภาคม': 5, 'มิถุนายน': 6, 'กรกฎาคม': 7, 'สิงหาคม': 8,
+            'กันยายน': 9, 'ตุลาคม': 10, 'พฤศจิกายน': 11, 'ธันวาคม': 12
+          };
+
+          const startMonth = monthMap[startMonthInput] || 1;
+          const endMonth = monthMap[endMonthInput] || 1;
+
+          const startYear = parseInt(startYearInput) - 543;
+          const endYear = parseInt(endYearInput) - 543;
+
+          const startDate = new Date(startYear, startMonth - 1, parseInt(startDateInput), parseInt(startTimeInput) || 0, 0, 0);
+          const endDate = new Date(endYear, endMonth - 1, parseInt(endDateInput), parseInt(endTimeInput) || 0, 0, 0);
+
+          if (startDate && endDate && endDate >= startDate) {
+            const timeDifference = endDate - startDate;
+            const totalHours = Math.floor(timeDifference / (1000 * 60 * 60));
+            const totalDays = Math.floor(totalHours / 24);
+            const remainingHours = totalHours % 24;
+
+            document.getElementById('totalDays').value = totalDays;
+            document.getElementById('totalHours').value = remainingHours;
+          }
+        }
+      }
+
+      // ฟังก์ชันแปลงตัวเลขเป็นตัวหนังสือภาษาไทย (รองรับทศนิยม/สตางค์)
+      function ThaiNumberToText(amount) {
+        if (isNaN(amount) || amount === 0) return "ศูนย์บาทถ้วน";
+
+        let numberString = Math.abs(amount).toFixed(2).toString();
+        let parts = numberString.split('.');
+        let baht = parts[0];
+        let satang = parts[1];
+
+        const readNumber = (numStr) => {
+          const numbers = ['ศูนย์', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า'];
+          const positions = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน'];
+          let text = '';
+          let length = numStr.length;
+
+          for (let i = 0; i < length; i++) {
+            let digit = parseInt(numStr.charAt(i));
+            let position = length - i - 1;
+
+            if (digit !== 0) {
+              if (position === 1 && digit === 1) {
+                text += positions[position];
+              } else if (position === 1 && digit === 2) {
+                text += 'ยี่' + positions[position];
+              } else if (position === 0 && digit === 1 && length > 1 && parseInt(numStr.charAt(i - 1)) !== 0) {
+                text += 'เอ็ด';
+              } else {
+                text += numbers[digit] + (position > 0 && position % 6 === 0 ? '' : positions[position % 6]);
+              }
+            }
+            // ใส่คำว่า "ล้าน" เมื่อถึงหลักล้าน
+            if (position > 0 && position % 6 === 0) {
+              text += 'ล้าน';
+            }
+          }
+          return text;
+        };
+
+        let result = '';
+        if (parseInt(baht) > 0) {
+          result += readNumber(baht) + 'บาท';
+        }
+
+        if (parseInt(satang) > 0) {
+          result += readNumber(satang) + 'สตางค์';
+        } else {
+          result += 'ถ้วน';
+        }
+
+        return result;
+      }
+
+      // อัปเดตฟังก์ชันคำนวณเงินให้เรียกใช้ฟังก์ชันภาษาไทยอัตโนมัติ
+      function calculateGrandTotal() {
+        const mealTotal = parseFloat(document.getElementById('mealTotal').value) || 0;
+        const lodgingTotal = parseFloat(document.getElementById('lodgingTotal').value) || 0;
+        const transportTotal = parseFloat(document.getElementById('transportTotal').value) || 0;
+        const otherTotal = parseFloat(document.getElementById('otherTotal').value) || 0;
+        const grandTotal = mealTotal + lodgingTotal + transportTotal + otherTotal;
+
+        // ใส่ตัวเลข
+        document.getElementById('grandTotal').value = grandTotal;
+        document.getElementById('doc-grandTotal').textContent = grandTotal || '-';
+
+        // ใส่ตัวหนังสือภาษาไทย
+        if (grandTotal > 0) {
+          const thaiText = ThaiNumberToText(grandTotal);
+          document.getElementById('grandTotalWords').value = thaiText;
+          document.getElementById('doc-grandTotalWords').textContent = thaiText;
+
+          // อัปเดตในเอกสารส่วนที่ 2 ด้วย
+          const doc2GrandTotalWords = document.querySelector('#document2-page .doc2-grandTotalWords');
+          if (doc2GrandTotalWords) doc2GrandTotalWords.textContent = thaiText;
+        } else {
+          document.getElementById('grandTotalWords').value = '';
+          document.getElementById('doc-grandTotalWords').textContent = '-';
+
+          const doc2GrandTotalWords = document.querySelector('#document2-page .doc2-grandTotalWords');
+          if (doc2GrandTotalWords) doc2GrandTotalWords.textContent = '-';
+        }
+      }
+      // ฟังก์ชันคำนวณ: ช่อง 1 (อัตรา) x ช่อง 2 (จำนวนวัน) = ช่อง 3 (รวมเงิน)
+      function calculateRowTotals() {
+        // 1. เบี้ยเลี้ยง
+        const mealRate = parseFloat(document.getElementById('mealAllowance').value) || 0;
+        const mealDays = parseFloat(document.getElementById('mealDays').value) || 0;
+        const mealTotal = mealRate * mealDays;
+        document.getElementById('mealTotal').value = mealTotal > 0 ? mealTotal : '';
+
+        // 2. ที่พัก
+        const lodgingRate = parseFloat(document.getElementById('lodgingType').value) || 0;
+        const lodgingDays = parseFloat(document.getElementById('lodgingDays').value) || 0;
+        const lodgingTotal = lodgingRate * lodgingDays;
+        document.getElementById('lodgingTotal').value = lodgingTotal > 0 ? lodgingTotal : '';
+
+        // เรียกฟังก์ชันรวมเงินทั้งสิ้นอัตโนมัติ
+        calculateGrandTotal();
+      }
+
+      // ----------------------------------------------------
+      // ลบคำสั่งดักจับเหตุการณ์ (Event Listeners) ตัวเก่าที่คอยจับ input ช่องต่างๆ ทิ้ง
+      // และใช้โค้ดชุดใหม่นี้แทนครับ:
+      // ----------------------------------------------------
+
+      // ดักจับช่อง เบี้ยเลี้ยง และ ที่พัก (ให้คูณกันอัตโนมัติ)
+      const calcInputs = ['mealAllowance', 'mealDays', 'lodgingType', 'lodgingDays'];
+      calcInputs.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('input', calculateRowTotals);
+        }
+      });
+
+      // ดักจับช่อง ค่าพาหนะ และ ค่าใช้จ่ายอื่นๆ (ช่องรวมเงินกรอกเอง)
+      ['transportTotal', 'otherTotal'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('input', calculateGrandTotal);
+        }
+      });
+
+      function buildDateString_TH(day, month, year) {
+        if (!day || !month || !year) return '';
+        return `${day} ${month} ${year}`;
+      }
+
+      function getFormData() {
+        const startType = document.querySelector('input[name="startType"]:checked')?.value || '';
+        const endType = document.querySelector('input[name="endType"]:checked')?.value || '';
+
+        return {
+          id: new Date().getTime().toString(),
+          loanNumber: document.getElementById('loanNumber').value,
+          loanDate: document.getElementById('loanDate').value,
+          loanMonth: document.getElementById('loanMonth').value,
+          loanYear: document.getElementById('loanYear').value,
+          borrowerName: document.getElementById('borrowerName').value,
+          borrowerAmount: document.getElementById('borrowerAmount').value,
+          office: document.getElementById('office').value,
+          formDate: document.getElementById('formDate').value,
+          formMonth: document.getElementById('formMonth').value,
+          formYear: document.getElementById('formYear').value,
+          commandNumber: document.getElementById('commandNumber').value,
+          commandDate: document.getElementById('commandDate').value,
+          commandMonth: document.getElementById('commandMonth').value,
+          commandYear: document.getElementById('commandYear').value,
+          fullName: document.getElementById('fullName').value,
+          position: document.getElementById('position').value,
+          department: document.getElementById('department').value,
+          companions: document.getElementById('companions').value,
+          travelPurpose: document.getElementById('travelPurpose').value,
+          startDepartureType: startType,
+          startDate: document.getElementById('startDate').value,
+          startMonth: document.getElementById('startMonth').value,
+          startYear: document.getElementById('startYear').value,
+          startTime: document.getElementById('startTime').value,
+          endDepartureType: endType,
+          endDate: document.getElementById('endDate').value,
+          endMonth: document.getElementById('endMonth').value,
+          endYear: document.getElementById('endYear').value,
+          endTime: document.getElementById('endTime').value,
+          totalDays: document.getElementById('totalDays').value,
+          totalHours: document.getElementById('totalHours').value,
+          mealAllowance: document.getElementById('mealAllowance').value,
+          mealDays: document.getElementById('mealDays').value,
+          mealTotal: document.getElementById('mealTotal').value,
+          lodgingType: document.getElementById('lodgingType').value,
+          lodgingDays: document.getElementById('lodgingDays').value,
+          lodgingTotal: document.getElementById('lodgingTotal').value,
+          transport: document.getElementById('transport').value,
+          transportTotal: document.getElementById('transportTotal').value,
+          otherExpense: document.getElementById('otherExpense').value,
+          otherTotal: document.getElementById('otherTotal').value,
+          grandTotal: document.getElementById('grandTotal').value,
+          grandTotalWords: document.getElementById('grandTotalWords').value,
+          evidenceCount: document.getElementById('evidenceCount').value,
+          signatureName: document.getElementById('signatureName').value,
+          signaturePosition: document.getElementById('signaturePosition').value
+        };
+      }
+
+      // 2. ฟังก์ชันอัปเดตเอกสาร (ที่หุ้มด้วย toThaiNumerals แล้วทั้งหมด)
+      // 2. ฟังก์ชันอัปเดตเอกสาร (ที่หุ้มด้วย toThaiNumerals แล้วทั้งหมด)
+      function updateDocumentFromData(data) {
+        // อัปเดตเอกสารส่วนที่ 1
+        document.getElementById('doc-loanNumber').textContent = toThaiNumerals(data.loanNumber) || '-';
+        // วันที่สัญญาเงินยืมและคำสั่ง
+        document.getElementById('doc-loanDate').textContent = toThaiNumerals(buildDateString_TH(data.loanDate, data.loanMonth, data.loanYear)) || '-';
+        document.getElementById('doc-commandDate').textContent = toThaiNumerals(buildDateString_TH(data.commandDate, data.commandMonth, data.commandYear)) || '-';
+
+        // วันที่ที่ทำการ (มุมขวาบน)
+        document.getElementById('doc-formDate_day').textContent = toThaiNumerals(data.formDate) || '-';
+        document.getElementById('doc-formDate_month').textContent = data.formMonth || '-'; // เดือนเป็นข้อความอยู่แล้ว ไม่ต้องแปลง
+        document.getElementById('doc-formDate_year').textContent = toThaiNumerals(data.formYear) || '-';
+
+        document.getElementById('doc-borrowerName').textContent = toThaiNumerals(data.borrowerName) || '-';
+        document.getElementById('doc-borrowerAmount').textContent = toThaiNumerals(data.borrowerAmount) || '-';
+        document.getElementById('doc-office').textContent = toThaiNumerals(data.office) || '-';
+        document.getElementById('doc-commandNumber').textContent = toThaiNumerals(data.commandNumber) || '-';
+        document.getElementById('doc-fullName').textContent = toThaiNumerals(data.fullName) || '-';
+        document.getElementById('doc-position').textContent = toThaiNumerals(data.position) || '-';
+        document.getElementById('doc-department').textContent = toThaiNumerals(data.department) || '-';
+        document.getElementById('doc-companions').textContent = toThaiNumerals(data.companions) || '-';
+        document.getElementById('doc-travelPurpose').textContent = toThaiNumerals(data.travelPurpose) || '-';
+
+        // อัปเดตวงกลมเลือก ออกเดินทาง/กลับถึง
+        document.getElementById('doc-start-home').textContent = data.startDepartureType === 'บ้านพัก' ? '◉' : '◯';
+        document.getElementById('doc-start-office').textContent = data.startDepartureType === 'สำนักงาน' ? '◉' : '◯';
+        document.getElementById('doc-end-home').textContent = data.endDepartureType === 'บ้านพัก' ? '◉' : '◯';
+        document.getElementById('doc-end-office').textContent = data.endDepartureType === 'สำนักงาน' ? '◉' : '◯';
+
+        document.getElementById('doc-startDate').textContent = toThaiNumerals(data.startDate) || '-';
+        document.getElementById('doc-startMonth').textContent = data.startMonth || '-';
+        document.getElementById('doc-startYear').textContent = toThaiNumerals(data.startYear) || '-';
+        document.getElementById('doc-startTime').textContent = toThaiNumerals(data.startTime) || '-';
+        document.getElementById('doc-endDate').textContent = toThaiNumerals(data.endDate) || '-';
+        document.getElementById('doc-endMonth').textContent = data.endMonth || '-';
+        document.getElementById('doc-endYear').textContent = toThaiNumerals(data.endYear) || '-';
+        document.getElementById('doc-endTime').textContent = toThaiNumerals(data.endTime) || '-';
+
+        document.getElementById('doc-totalDays').textContent = toThaiNumerals(data.totalDays) || '-';
+        document.getElementById('doc-totalHours').textContent = toThaiNumerals(data.totalHours) || '-';
+
+        document.getElementById('doc-mealAllowance').textContent = toThaiNumerals(data.mealAllowance) || '-';
+        document.getElementById('doc-mealDays').textContent = toThaiNumerals(data.mealDays) || '-';
+        document.getElementById('doc-mealTotal').textContent = toThaiNumerals(data.mealTotal) || '-';
+
+        document.getElementById('doc-lodgingType').textContent = toThaiNumerals(data.lodgingType) || '-';
+        document.getElementById('doc-lodgingDays').textContent = toThaiNumerals(data.lodgingDays) || '-';
+        document.getElementById('doc-lodgingTotal').textContent = toThaiNumerals(data.lodgingTotal) || '-';
+
+        document.getElementById('doc-transport').textContent = toThaiNumerals(data.transport) || '-';
+        document.getElementById('doc-transportTotal').textContent = toThaiNumerals(data.transportTotal) || '-';
+
+        document.getElementById('doc-otherExpense').textContent = toThaiNumerals(data.otherExpense) || '-';
+        document.getElementById('doc-otherTotal').textContent = toThaiNumerals(data.otherTotal) || '-';
+
+        document.getElementById('doc-grandTotal').textContent = toThaiNumerals(data.grandTotal) || '-';
+        document.getElementById('doc-grandTotalWords').textContent = data.grandTotalWords || '-'; // ยอดเงินภาษาไทย ไม่ต้องแปลง
+        document.getElementById('doc-evidenceCount').textContent = toThaiNumerals(data.evidenceCount) || '-';
+
+        document.getElementById('doc-signatureName').textContent = toThaiNumerals(data.signatureName) || '-';
+        document.getElementById('doc-signaturePosition').textContent = toThaiNumerals(data.signaturePosition) || '-';
+
+        // Sync ไปที่ Document 2 (ส่วนที่ 2)
+        const doc2LoanNum = document.querySelector('#document2-page .doc2-loanNumber');
+        const doc2LoanDate = document.querySelector('#document2-page .doc2-loanDate');
+        const doc2GrandTotal = document.querySelector('#document2-page .doc2-grandTotal');
+        const doc2GrandTotalWords = document.querySelector('#document2-page .doc2-grandTotalWords');
+        const doc2PayeeName = document.querySelector('#document2-page .payee-receiver-name');
+        const doc2PayeePos = document.querySelector('#document2-page .payee-receiver-pos');
+        const doc2PayeeDate = document.querySelector('#document2-page .payee-receiver-date');
+
+        if (doc2LoanNum) doc2LoanNum.textContent = toThaiNumerals(data.loanNumber) || '-';
+        if (doc2LoanDate) doc2LoanDate.textContent = toThaiNumerals(buildDateString_TH(data.loanDate, data.loanMonth, data.loanYear)) || '-';
+        if (doc2GrandTotal) doc2GrandTotal.textContent = toThaiNumerals(data.grandTotal) || '-';
+        if (doc2GrandTotalWords) doc2GrandTotalWords.textContent = data.grandTotalWords || '-';
+        if (doc2PayeeName) doc2PayeeName.textContent = toThaiNumerals(data.fullName) || '-';
+        if (doc2PayeePos) doc2PayeePos.textContent = toThaiNumerals(data.position) || '-';
+        if (doc2PayeeDate) doc2PayeeDate.textContent = toThaiNumerals(buildDateString_TH(data.formDate, data.formMonth, data.formYear)) || '-';
+
+        // Sync ไปที่ Document 3 (ส่วนที่ 3 แนวนอน)
+        document.querySelectorAll('.doc3-fullName').forEach(el => el.textContent = toThaiNumerals(data.fullName) || '-');
+        document.querySelectorAll('.doc3-position').forEach(el => el.textContent = toThaiNumerals(data.position) || '-');
+        document.querySelectorAll('.doc3-meal').forEach(el => el.textContent = toThaiNumerals(data.mealTotal) || '-');
+        document.querySelectorAll('.doc3-lodging').forEach(el => el.textContent = toThaiNumerals(data.lodgingTotal) || '-');
+        document.querySelectorAll('.doc3-transport').forEach(el => el.textContent = toThaiNumerals(data.transportTotal) || '-');
+        document.querySelectorAll('.doc3-other').forEach(el => el.textContent = toThaiNumerals(data.otherTotal) || '-');
+        document.querySelectorAll('.doc3-total').forEach(el => el.textContent = toThaiNumerals(data.grandTotal) || '-');
+        document.querySelectorAll('.doc3-totalWords').forEach(el => el.textContent = data.grandTotalWords || '-');
+
+        const doc3DateStr = buildDateString_TH(data.formDate, data.formMonth, data.formYear);
+        document.querySelectorAll('.doc3-date').forEach(el => el.textContent = toThaiNumerals(doc3DateStr) || '-');
+      }
+
+      function syncApprovalToDocument2() {
+        // ดึงข้อมูลผู้ตรวจสอบ
+        const verifierName = document.getElementById('verifierName').value || '';
+        const verifierPosition = document.getElementById('verifierPosition').value || '';
+        const verifyDate_day = document.getElementById('verifyDate_day').value || '';
+        const verifyDate_month = document.getElementById('verifyDate_month').value || '';
+        const verifyDate_year = document.getElementById('verifyDate_year').value || '';
+        const verifyDate = buildDateString_TH(verifyDate_day, verifyDate_month, verifyDate_year);
+
+        // ดึงข้อมูลผู้พิจารณา (จากส่วน Decision)
+        const decisionMakerName = document.getElementById('decisionMakerName').value || '';
+        const decisionMakerPosition = document.getElementById('decisionMakerPosition').value || '';
+        const decisionDate_day = document.getElementById('decisionDate_day').value || '';
+        const decisionDate_month = document.getElementById('decisionDate_month').value || '';
+        const decisionDate_year = document.getElementById('decisionDate_year').value || '';
+        const decisionDate = buildDateString_TH(decisionDate_day, decisionDate_month, decisionDate_year);
+
+        // ดึงข้อมูลผู้อนุมัติหลัก
+        const approverName = document.getElementById('approverName').value || '';
+        const approverPosition = document.getElementById('approverPosition').value || '';
+        const approvalDate_day = document.getElementById('approvalDate_day').value || '';
+        const approvalDate_month = document.getElementById('approvalDate_month').value || '';
+        const approvalDate_year = document.getElementById('approvalDate_year').value || '';
+        const approvalDate = buildDateString_TH(approvalDate_day, approvalDate_month, approvalDate_year);
+
+        const decision = document.querySelector('input[name="approvalDecision"]:checked')?.value;
+        const notes = document.getElementById('approvalNotes').value || '';
+
+        // 1. เชื่อมโยงไปยัง Document 2 ส่วนการพิจารณา (ฝั่งซ้ายบน)
+        const decisionMakerNameDisplayField = document.querySelector('#document2-page .decision-maker-name-display');
+        const decisionMakerPositionField = document.querySelector('#document2-page .decision-maker-position');
+        const decisionMakerDateField = document.querySelector('#document2-page .decision-maker-date');
+
+        if (decisionMakerNameDisplayField) decisionMakerNameDisplayField.textContent = decisionMakerName;
+        if (decisionMakerPositionField) decisionMakerPositionField.textContent = decisionMakerPosition;
+        // เพิ่มแปลงเลขไทยตรงนี้
+        if (decisionMakerDateField) decisionMakerDateField.textContent = toThaiNumerals(decisionDate);
+
+        // 2. เชื่อมโยงไปยัง Document 2 ส่วนที่ตรวจสอบ / ผู้จ่ายเงิน (ฝั่งขวาล่าง)
+        const verifierNameDisplayField = document.querySelector('#document2-page .verify-name-display');
+        const verifierPositionField = document.querySelector('#document2-page .verify-position');
+        const verifierDateField = document.querySelector('#document2-page .verify-date');
+
+        if (verifierNameDisplayField) verifierNameDisplayField.textContent = verifierName;
+        if (verifierPositionField) verifierPositionField.textContent = verifierPosition;
+        // เพิ่มแปลงเลขไทยตรงนี้
+        if (verifierDateField) verifierDateField.textContent = toThaiNumerals(verifyDate);
+
+        // 3. เชื่อมโยงไปยัง Document 2 ส่วนที่อนุมัติ (ฝั่งขวาบน)
+        const approverNameDisplays = document.querySelectorAll('#document2-page .approver-name');
+        const approverPositionField = document.querySelector('#document2-page .approver-position');
+        const approverDateField = document.querySelector('#document2-page .approver-date');
+        const doc2Decision = document.getElementById('doc2-decision');
+        const doc2Notes = document.querySelector('#document2-page .doc2-notes');
+
+        if (approverNameDisplays.length > 1) {
+          approverNameDisplays[1].textContent = approverName;
+        } else if (approverNameDisplays.length === 1) {
+          approverNameDisplays[0].textContent = approverName;
+        }
+
+        if (approverPositionField) approverPositionField.textContent = approverPosition;
+        // เพิ่มแปลงเลขไทยตรงนี้
+        if (approverDateField) approverDateField.textContent = toThaiNumerals(approvalDate);
+
+        // จัดการข้อความผลการพิจารณา
+        if (doc2Decision) {
+          if (decision === 'approved') {
+            doc2Decision.innerHTML = `<span contenteditable="true" class="editable-field">เห็นควรอนุมัติให้เบิกจ่ายได้</span>`;
+          } else if (decision === 'rejected') {
+            // แปลงหมายเหตุเป็นเลขไทยด้วยเผื่อพิมพ์ตัวเลขลงไป
+            doc2Decision.innerHTML = `<span contenteditable="true" class="editable-field">ไม่เห็นควรอนุมัติเนื่องจาก ${toThaiNumerals(notes)}</span>`;
+          } else if (decision === 'pending') {
+            doc2Decision.innerHTML = `<span contenteditable="true" class="editable-field">ส่งกลับแก้ไข / เพิ่มเติมเอกสาร</span>`;
+          } else {
+            doc2Decision.innerHTML = `<span contenteditable="true" class="editable-field">เห็นควรอนุมัติให้เบิกจ่ายได้</span>`;
+          }
+        }
+
+        if (doc2Notes && notes) {
+          doc2Notes.textContent = toThaiNumerals(notes);
+        }
+      }
+
+      function loadApprovalForm() {
+        if (allRecords.length > 0) {
+          const data = allRecords[0];
+          document.getElementById('approvalRequesterName').value = data.fullName || '';
+          document.getElementById('approvalRequesterPosition').value = data.position || '';
+          document.getElementById('approvalAmount').value = data.grandTotal || '';
+          const startDate = `${data.startDate}/${data.startMonth}/${data.startYear}`;
+          const endDate = `${data.endDate}/${data.endMonth}/${data.endYear}`;
+          document.getElementById('approvalTravelPeriod').value = `${startDate} - ${endDate}`;
+        }
+      }
+
+      function updateTrackingWithApproval() {
+        if (!approvalData) return;
+        let statusText = '';
+        let statusClass = '';
+        if (approvalData.decision === 'approved') {
+          statusText = '✅ อนุมัติแล้ว';
+          statusClass = 'text-green-600';
+        } else if (approvalData.decision === 'rejected') {
+          statusText = '❌ ไม่อนุมัติ';
+          statusClass = 'text-red-600';
+        } else if (approvalData.decision === 'pending') {
+          statusText = '⏳ รอการแก้ไข';
+          statusClass = 'text-orange-600';
+        }
+        const statusElement = document.getElementById('current-status');
+        if (statusElement) {
+          statusElement.textContent = statusText;
+          statusElement.className = `text-2xl font-bold ${statusClass}`;
+        }
+        const timelineContainer = document.getElementById('timeline-container');
+        if (timelineContainer) {
+          timelineContainer.innerHTML = '';
+          const timeline = [
+            {
+              icon: '📝',
+              title: 'บันทึกข้อมูล',
+              desc: allRecords.length > 0 ? '✅ เสร็จเรียบร้อย' : 'รอการกรอกฟอร์ม',
+              active: allRecords.length > 0
+            },
+            {
+              icon: '✅',
+              title: 'การอนุมัติ',
+              desc: `ผู้อนุมัติ: ${approvalData.approverName}`,
+              active: true
+            },
+            {
+              icon: '📄',
+              title: 'เสร็จสิ้น',
+              desc: approvalData.decision === 'approved' ? '✅ ได้รับอนุมัติ' : 'รอการแก้ไข',
+              active: approvalData.decision === 'approved'
+            }
+          ];
+          timeline.forEach(item => {
+            const timelineItem = document.createElement('div');
+            timelineItem.className = `timeline-item ${item.active ? 'active' : ''}`;
+            timelineItem.innerHTML = `
+<div class="timeline-dot"></div>
+<div>
+<p class="font-semibold text-gray-800">${item.icon} ${item.title}</p>
+<p class="text-sm text-gray-600">${item.desc}</p>
+</div>
+`;
+            timelineContainer.appendChild(timelineItem);
+          });
+        }
+        const historyContainer = document.getElementById('history-container');
+        if (historyContainer) {
+          const card = document.createElement('div');
+          card.className = 'history-card';
+          let statusBadgeClass = 'status-pending';
+          let statusBadgeText = 'รอการแก้ไข';
+          if (approvalData.decision === 'approved') {
+            statusBadgeClass = 'status-approved';
+            statusBadgeText = 'อนุมัติแล้ว';
+          } else if (approvalData.decision === 'rejected') {
+            statusBadgeClass = 'status-rejected';
+            statusBadgeText = 'ไม่อนุมัติ';
+          }
+          card.innerHTML = `
+<div class="flex justify-between items-start mb-3">
+<div>
+<p class="font-semibold text-gray-800">การอนุมัติ</p>
+<p class="text-sm text-gray-500">${approvalData.timestamp}</p>
+</div>
+<span class="status-badge ${statusBadgeClass}">${statusBadgeText}</span>
+</div>
+<div class="grid grid-cols-2 gap-2 text-sm">
+<p><span class="font-medium">ผู้อนุมัติ:</span> ${approvalData.approverName}</p>
+<p><span class="font-medium">ตำแหน่ง:</span> ${approvalData.approverPosition}</p>
+<p colspan="2"><span class="font-medium">หมายเหตุ:</span> ${approvalData.notes || '-'}</p>
+</div>
+`;
+          const firstCard = historyContainer.querySelector('.history-card');
+          if (firstCard) {
+            historyContainer.insertBefore(card, firstCard);
+          } else {
+            historyContainer.innerHTML = '';
+            historyContainer.appendChild(card);
+          }
+        }
+      }
+
+      function updateTrackingStatus() {
+        if (allRecords.length === 0) {
+          document.getElementById('current-status').textContent = 'รอการบันทึก';
+          document.getElementById('current-status').className = 'text-2xl font-bold text-gray-400';
+          document.getElementById('total-amount').textContent = '0 บาท';
+          document.getElementById('requester-name').textContent = '-';
+          return;
+        }
+
+        const data = allRecords[0];
+        const grandTotal = parseFloat(data.grandTotal) || 0;
+        document.getElementById('total-amount').textContent = grandTotal.toLocaleString() + ' บาท';
+        document.getElementById('requester-name').textContent = data.fullName || '-';
+
+        if (approvalData) {
+          updateTrackingWithApproval();
+        } else {
+          let status = 'บันทึกข้อมูลแล้ว';
+          let statusClass = 'text-yellow-600';
+
+          document.getElementById('current-status').textContent = status;
+          document.getElementById('current-status').className = `text-2xl font-bold ${statusClass}`;
+
+          const timelineContainer = document.getElementById('timeline-container');
+          timelineContainer.innerHTML = '';
+          const timeline = [
+            {
+              icon: '📝',
+              title: 'บันทึกข้อมูล',
+              desc: '✅ เสร็จเรียบร้อย',
+              active: true
+            },
+            {
+              icon: '✅',
+              title: 'รอการอนุมัติ',
+              desc: 'ระบบรอการลงนามจากผู้อนุมัติ',
+              active: false
+            },
+            {
+              icon: '📄',
+              title: 'เสร็จสิ้น',
+              desc: 'กระบวนการเสร็จสิ้น',
+              active: false
+            }
+          ];
+          timeline.forEach(item => {
+            const timelineItem = document.createElement('div');
+            timelineItem.className = `timeline-item ${item.active ? 'active' : ''}`;
+            timelineItem.innerHTML = `
+<div class="timeline-dot"></div>
+<div>
+<p class="font-semibold text-gray-800">${item.icon} ${item.title}</p>
+<p class="text-sm text-gray-600">${item.desc}</p>
+</div>
+`;
+            timelineContainer.appendChild(timelineItem);
+          });
+        }
+      }
+
+      function showSaveMessage(message, type) {
+        const messageEl = document.getElementById('save-message');
+        messageEl.textContent = message;
+        messageEl.className = `p-3 rounded text-center font-semibold ${type === 'green' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+        messageEl.classList.remove('hidden');
+        setTimeout(() => {
+          messageEl.classList.add('hidden');
+        }, 3000);
+      }
+
+      function showApprovalMessage(message, type) {
+        const messageEl = document.getElementById('approval-message');
+        messageEl.textContent = message;
+        messageEl.className = `p-3 rounded text-center font-semibold ${type === 'green' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+        messageEl.classList.remove('hidden');
+        setTimeout(() => {
+          messageEl.classList.add('hidden');
+        }, 3000);
+      }
+
+      function clearForm() {
+        document.getElementById('expense-form').reset();
+        document.querySelectorAll('input[type="radio"]').forEach(el => el.checked = false);
+        document.getElementById('totalDays').value = '';
+        document.getElementById('totalHours').value = '';
+        document.getElementById('grandTotal').value = '';
+        document.getElementById('position').value = '';
+        showSaveMessage('✨ ล้างฟอร์มแล้ว', 'green');
+      }
+
+      function clearApprovalForm() {
+        document.getElementById('approval-form').reset();
+        document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
+        document.getElementById('approverPosition').value = '';
+        showApprovalMessage('✨ ล้างแบบฟอร์มแล้ว', 'green');
+      }
+
+      async function saveFormData() {
+        const formData = getFormData();
+        if (allRecords.length > 0) {
+          const recordToUpdate = { ...allRecords[0], ...formData };
+          allRecords[0] = recordToUpdate;
+          saveToLocalStorage(); // บันทึกลง localStorage
+          if (window.dataSdk) {
+            const updateResult = await window.dataSdk.update(recordToUpdate);
+            if (updateResult.isOk) {
+              showSaveMessage('✅ บันทึกข้อมูลสำเร็จ!', 'green');
+            } else {
+              showSaveMessage('❌ เกิดข้อผิดพลาด: ' + updateResult.error.message, 'red');
+            }
+          } else {
+            showSaveMessage('✅ บันทึกข้อมูลสำเร็จ! (บันทึกในเครื่องเท่านั้น)', 'green');
+          }
+        } else {
+          allRecords.push(formData);
+          saveToLocalStorage(); // บันทึกลง localStorage
+          if (window.dataSdk) {
+            const createResult = await window.dataSdk.create(formData);
+            if (createResult.isOk) {
+              showSaveMessage('✅ บันทึกข้อมูลสำเร็จ!', 'green');
+              await loadData();
+            } else {
+              showSaveMessage('❌ เกิดข้อผิดพลาด: ' + createResult.error.message, 'red');
+            }
+          } else {
+            showSaveMessage('✅ บันทึกข้อมูลสำเร็จ! (บันทึกในเครื่องเท่านั้น)', 'green');
+          }
+        }
+      }
+
+      async function loadData() {
+        // โหลดข้อมูลจาก localStorage ก่อน
+        loadFromLocalStorage();
+
+        if (window.dataSdk) {
+          const result = await window.dataSdk.read();
+          if (result.isOk) {
+            allRecords = result.data;
+            saveToLocalStorage(); // บันทึกข้อมูลที่ดึงมาลง localStorage
+          }
+        }
+
+        if (allRecords.length > 0) {
+          const data = allRecords[0];
+          document.getElementById('loanNumber').value = data.loanNumber || '';
+          document.getElementById('loanDate').value = data.loanDate || '';
+          if (document.getElementById('loanMonth')) document.getElementById('loanMonth').value = data.loanMonth || '';
+          if (document.getElementById('loanYear')) document.getElementById('loanYear').value = data.loanYear || '';
+          document.getElementById('borrowerName').value = data.borrowerName || '';
+          document.getElementById('borrowerAmount').value = data.borrowerAmount || '';
+          document.getElementById('office').value = data.office || '';
+          document.getElementById('formDate').value = data.formDate || '';
+          if (document.getElementById('formMonth')) document.getElementById('formMonth').value = data.formMonth || '';
+          if (document.getElementById('formYear')) document.getElementById('formYear').value = data.formYear || '';
+          document.getElementById('commandNumber').value = data.commandNumber || '';
+          document.getElementById('commandDate').value = data.commandDate || '';
+          if (document.getElementById('commandMonth')) document.getElementById('commandMonth').value = data.commandMonth || '';
+          if (document.getElementById('commandYear')) document.getElementById('commandYear').value = data.commandYear || '';
+          document.getElementById('fullName').value = data.fullName || '';
+          document.getElementById('position').value = data.position || '';
+          document.getElementById('department').value = data.department || '';
+          document.getElementById('companions').value = data.companions || '';
+          document.getElementById('travelPurpose').value = data.travelPurpose || '';
+          if (data.startDepartureType) {
+            const startRadio = document.querySelector(`input[name="startType"][value="${data.startDepartureType}"]`);
+            if (startRadio) startRadio.checked = true;
+          }
+          if (data.endDepartureType) {
+            const endRadio = document.querySelector(`input[name="endType"][value="${data.endDepartureType}"]`);
+            if (endRadio) endRadio.checked = true;
+          }
+          document.getElementById('startDate').value = data.startDate || '';
+          document.getElementById('startMonth').value = data.startMonth || '';
+          document.getElementById('startYear').value = data.startYear || '';
+          document.getElementById('startTime').value = data.startTime || '';
+          document.getElementById('endDate').value = data.endDate || '';
+          document.getElementById('endMonth').value = data.endMonth || '';
+          document.getElementById('endYear').value = data.endYear || '';
+          document.getElementById('endTime').value = data.endTime || '';
+          document.getElementById('totalDays').value = data.totalDays || '';
+          document.getElementById('totalHours').value = data.totalHours || '';
+          document.getElementById('mealAllowance').value = data.mealAllowance || '';
+          document.getElementById('mealDays').value = data.mealDays || '';
+          document.getElementById('mealTotal').value = data.mealTotal || '';
+          document.getElementById('lodgingType').value = data.lodgingType || '';
+          document.getElementById('lodgingDays').value = data.lodgingDays || '';
+          document.getElementById('lodgingTotal').value = data.lodgingTotal || '';
+          document.getElementById('transport').value = data.transport || '';
+          document.getElementById('transportTotal').value = data.transportTotal || '';
+          document.getElementById('otherExpense').value = data.otherExpense || '';
+          document.getElementById('otherTotal').value = data.otherTotal || '';
+          document.getElementById('grandTotal').value = data.grandTotal || '';
+          document.getElementById('grandTotalWords').value = data.grandTotalWords || '';
+          document.getElementById('evidenceCount').value = data.evidenceCount || '';
+          document.getElementById('signatureName').value = data.signatureName || '';
+          document.getElementById('signaturePosition').value = data.signaturePosition || '';
+          updateDocumentFromData(data);
+        }
+      }
+
+      document.getElementById('expense-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        saveFormData();
+        updateDocumentFromData(getFormData());
+        showPage('document');
+      });
+
+      document.getElementById('approval-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const decision = document.querySelector('input[name="approvalDecision"]:checked')?.value;
+        if (!decision) {
+          showApprovalMessage('❌ กรุณาเลือกการตัดสินใจ', 'red');
+          return;
+        }
+        if (!document.getElementById('approverName').value) {
+          showApprovalMessage('❌ กรุณาเลือกชื่อผู้อนุมัติ', 'red');
+          return;
+        }
+        if (!document.getElementById('approverPosition').value) {
+          showApprovalMessage('❌ กรุณาเลือกตำแหน่งผู้อนุมัติ', 'red');
+          return;
+        }
+        approvalData = {
+          approverName: document.getElementById('approverName').value,
+          approverPosition: document.getElementById('approverPosition').value,
+          decision: decision,
+          notes: document.getElementById('approvalNotes').value,
+          timestamp: new Date().toLocaleString('th-TH')
+        };
+        saveToLocalStorage(); // บันทึกข้อมูลการอนุมัติลง localStorage
+        syncApprovalToDocument2();
+        showApprovalMessage(`✅ บันทึกการอนุมัติสำเร็จ! (${decision === 'approved' ? 'อนุมัติ' : decision === 'rejected' ? 'ไม่อนุมัติ' : 'รอการแก้ไข'})`, 'green');
+        updateTrackingWithApproval();
+        showPage('document2');
+      });
+
+      document.getElementById('verifierName').addEventListener('change', syncApprovalToDocument2);
+      document.getElementById('verifierPosition').addEventListener('change', syncApprovalToDocument2);
+      document.getElementById('verifyDate_day').addEventListener('change', syncApprovalToDocument2);
+      document.getElementById('verifyDate_month').addEventListener('change', syncApprovalToDocument2);
+      document.getElementById('verifyDate_year').addEventListener('change', syncApprovalToDocument2);
+
+      document.getElementById('decisionMakerName').addEventListener('change', syncApprovalToDocument2);
+      document.getElementById('decisionMakerPosition').addEventListener('change', syncApprovalToDocument2);
+      document.getElementById('decisionDate_day').addEventListener('change', syncApprovalToDocument2);
+      document.getElementById('decisionDate_month').addEventListener('change', syncApprovalToDocument2);
+      document.getElementById('decisionDate_year').addEventListener('change', syncApprovalToDocument2);
+
+      document.getElementById('approverName').addEventListener('change', syncApprovalToDocument2);
+      document.getElementById('approverPosition').addEventListener('change', syncApprovalToDocument2);
+      document.getElementById('approvalDate_day').addEventListener('change', syncApprovalToDocument2);
+      document.getElementById('approvalDate_month').addEventListener('change', syncApprovalToDocument2);
+      document.getElementById('approvalDate_year').addEventListener('change', syncApprovalToDocument2);
+      document.getElementById('approvalNotes').addEventListener('input', syncApprovalToDocument2);
+      document.getElementsByName('approvalDecision').forEach(radio => {
+        radio.addEventListener('change', syncApprovalToDocument2);
+      });
+
+      document.getElementById('startDate').addEventListener('change', calculateTravelTime);
+      document.getElementById('startMonth').addEventListener('change', calculateTravelTime);
+      document.getElementById('startYear').addEventListener('change', calculateTravelTime);
+      document.getElementById('startTime').addEventListener('change', calculateTravelTime);
+      document.getElementById('endDate').addEventListener('change', calculateTravelTime);
+      document.getElementById('endMonth').addEventListener('change', calculateTravelTime);
+      document.getElementById('endYear').addEventListener('change', calculateTravelTime);
+      document.getElementById('endTime').addEventListener('change', calculateTravelTime);
+
+      document.getElementById('mealTotal').addEventListener('change', calculateGrandTotal);
+      document.getElementById('mealTotal').addEventListener('input', calculateGrandTotal);
+      document.getElementById('lodgingTotal').addEventListener('change', calculateGrandTotal);
+      document.getElementById('lodgingTotal').addEventListener('input', calculateGrandTotal);
+      document.getElementById('transportTotal').addEventListener('change', calculateGrandTotal);
+      document.getElementById('transportTotal').addEventListener('input', calculateGrandTotal);
+      document.getElementById('otherTotal').addEventListener('change', calculateGrandTotal);
+      document.getElementById('otherTotal').addEventListener('input', calculateGrandTotal);
+
+      document.getElementById('expense-form').addEventListener('change', () => {
+        updateDocumentFromData(getFormData());
+      });
+
+      document.getElementById('expense-form').addEventListener('input', () => {
+        updateDocumentFromData(getFormData());
+      });
+
+      // บันทึกข้อมูลอัตโนมัติเมื่อมีการเปลี่ยนแปลง
+      document.getElementById('expense-form').addEventListener('change', () => {
+        saveToLocalStorage();
+      });
+
+      document.getElementById('expense-form').addEventListener('input', () => {
+        saveToLocalStorage();
+      });
+
+      // บันทึกข้อมูลการอนุมัติอัตโนมัติเมื่อมีการเปลี่ยนแปลง
+      document.getElementById('approval-form').addEventListener('change', () => {
+        if (approvalData) {
+          saveToLocalStorage();
+        }
+      });
+
+      document.getElementById('approval-form').addEventListener('input', () => {
+        if (approvalData) {
+          saveToLocalStorage();
+        }
+      });
+
+      async function init() {
+        // 1. สร้างตัวเลือก วัน/เดือน/ปี
+        initializeDateSelectors();
+
+        // 2. ล้างข้อมูลที่ถูกบันทึกค้างไว้ในระบบและ LocalStorage ทั้งหมด
+        clearAllData();
+
+        // 3. ล้างค่าในฟอร์มกรอกและฟอร์มอนุมัติให้เป็นค่าว่าง (แบบไม่แจ้งเตือน Popup)
+        document.getElementById('expense-form').reset();
+        document.getElementById('approval-form').reset();
+
+        // หมายเหตุ: ปิดการเรียกใช้ await loadData() เพื่อไม่ให้ดึงข้อมูลเก่ากลับมาใส่ฟอร์ม
+
+        // 4. รีเซ็ตหน้าเอกสารส่วนที่ 1 และ 2 ให้เป็นค่าว่างตามฟอร์ม
+        updateDocumentFromData(getFormData());
+
+        // 5. โหลด Element SDK สำหรับตั้งค่าหัวกระดาษ (ถ้ามี)
+        if (window.elementSdk) {
+          window.elementSdk.init({
+            defaultConfig,
+            onConfigChange: async (config) => {
+              document.getElementById('document-title').textContent = config.document_title || defaultConfig.document_title;
+            },
+            mapToCapabilities: (config) => ({
+              recolorables: [],
+              borderables: [],
+              fontEditable: undefined,
+              fontSizeable: undefined
+            }),
+            mapToEditPanelValues: (config) => new Map([
+              ['document_title', config.document_title || defaultConfig.document_title]
+            ])
+          });
+        }
+      }
+      // 1. ฟังก์ชันเสริมสำหรับแปลงเลขอารบิก เป็นเลขไทย
+      function toThaiNumerals(text) {
+        if (text === null || text === undefined || text === '') return text;
+        const thaiNumbers = ['๐', '๑', '๒', '๓', '๔', '๕', '๖', '๗', '๘', '๙'];
+        // ค้นหาตัวเลข 0-9 ทุกตัวในข้อความ แล้วแทนที่ด้วยเลขไทย
+        return text.toString().replace(/\d/g, (match) => thaiNumbers[match]);
+      }
+      // ==========================================
+      // ระบบแปลงเลขไทยอัตโนมัติเมื่อคลิกออกนอกช่อง (ครอบคลุมทั้งหน้าเอกสาร)
+      // ==========================================
+      document.addEventListener('focusout', (e) => {
+        // เช็คว่าช่องที่เพิ่งคลิกออก เป็นช่องที่แก้ไขได้ (contenteditable) หรือไม่
+        if (e.target.hasAttribute('contenteditable')) {
+
+          // กรณีที่ 1: เป็นช่องกรอกตัวเลขในตารางค่าใช้จ่าย (คำนวณยอด + ใส่ลูกน้ำ + เลขไทย)
+          if (e.target.classList.contains('expense-input')) {
+            const text = e.target.textContent.trim();
+            if (text !== '') {
+              const number = parseNumber(text);
+              e.target.textContent = number === 0 ? '' : formatNumber(number);
+            }
+            calculateTotals();
+          }
+          // กรณีที่ 2: เป็นช่องข้อความอื่นๆ ทั่วไปทั้งหน้า (แปลงอารบิก 0-9 เป็น ๐-๙ อย่างเดียว)
+          else {
+            const originalText = e.target.textContent;
+            if (originalText) {
+              const thaiText = arabicToThai(originalText);
+              // ถ้ามีเลขอารบิกปนอยู่ ให้เปลี่ยนเป็นเลขไทย
+              if (originalText !== thaiText) {
+                e.target.textContent = thaiText;
+              }
+            }
+          }
+        }
+      });
+      // ฟังก์ชันดาวน์โหลด PDF (ฉบับแก้ปัญหาหน้าว่าง + แก้ค่าเพี้ยน)
+      function downloadPDF(pageId, filename) {
+        const originalElement = document.querySelector(`#${pageId} .print-container`);
+
+        // 1. สร้าง Container ชั่วคราว 
+        // เปลี่ยนจากโยนออกนอกจอ เป็นการซ่อนไว้ข้างหลังสุด (z-index: -1) ให้ยังอยู่ใน Viewport
+        const tempContainer = document.createElement('div');
+        tempContainer.style.position = 'fixed';
+        tempContainer.style.top = '0';
+        tempContainer.style.left = '0';
+        tempContainer.style.width = '210mm'; // บังคับกว้าง A4
+        tempContainer.style.zIndex = '-1';   // ซ่อนไว้หลังสุด ผู้ใช้จะมองไม่เห็น
+        tempContainer.style.backgroundColor = 'white';
+
+        // 2. Clone เนื้อหามาใส่
+        const clone = originalElement.cloneNode(true);
+
+        // ลบ class หรือ style ที่มีผลต่อหน้าจอแสดงผลออก
+        clone.classList.remove('mx-auto', 'shadow-sm', 'max-w-4xl');
+        clone.style.margin = '0';
+        clone.style.boxShadow = 'none';
+        clone.style.transform = 'none';
+
+        tempContainer.appendChild(clone);
+        document.body.appendChild(tempContainer);
+
+        // เลื่อนหน้าจอไปบนสุด
+        window.scrollTo(0, 0);
+
+        const opt = {
+          margin: 0,
+          filename: filename,
+          image: { type: 'jpeg', quality: 1 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            scrollY: 0,
+            scrollX: 0,
+            windowWidth: 794 // ความกว้างจำลองของ A4
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        const btn = event.currentTarget;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '⏳ กำลังสร้างไฟล์...';
+        btn.disabled = true;
+
+        // 3. ใช้ setTimeout หน่วงเวลา 150ms ให้เบราว์เซอร์ Render ตัวโคลนให้เสร็จก่อนแคปเจอร์ภาพ
+        setTimeout(() => {
+          html2pdf().set(opt).from(tempContainer).save().then(() => {
+            // เมื่อสร้างเสร็จ ลบ Container ชั่วคราวทิ้ง
+            document.body.removeChild(tempContainer);
+
+            // คืนค่าปุ่ม
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+          }).catch(err => {
+            console.error('เกิดข้อผิดพลาดในการสร้าง PDF:', err);
+            document.body.removeChild(tempContainer);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+          });
+        }, 150);
+      }
+
+      // ฟังก์ชันดาวน์โหลด Word (DOC)
+      function downloadWord(pageId, filename) {
+        const element = document.querySelector(`#${pageId} .print-container`);
+
+        // สร้างหัว HTML สำหรับไฟล์ Word (บังคับฟอนต์และรองรับภาษาไทย)
+        const preHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+    <head><meta charset='utf-8'><title>Export HTML To Doc</title>
+    <style>
+      body { font-family: 'TH Sarabun PSK', 'Sarabun', sans-serif; }
+      table { border-collapse: collapse; width: 100%; }
+      td, th { border: 1px solid black; padding: 5px; }
+    </style>
+    </head><body>`;
+        const postHtml = "</body></html>";
+
+        // นำเนื้อหาเอกสารมาต่อกัน
+        const html = preHtml + element.innerHTML + postHtml;
+
+        // สร้าง Blob สำหรับดาวน์โหลด
+        const blob = new Blob(['\ufeff', html], {
+          type: 'application/msword'
+        });
+
+        // จำลองการคลิกลิงก์เพื่อดาวน์โหลด
+        const downloadLink = document.createElement("a");
+        document.body.appendChild(downloadLink);
+
+        if (navigator.msSaveOrOpenBlob) {
+          navigator.msSaveOrOpenBlob(blob, filename);
+        } else {
+          downloadLink.href = URL.createObjectURL(blob);
+          downloadLink.download = filename;
+          downloadLink.click();
+        }
+        document.body.removeChild(downloadLink);
+      }
+
+      // เพิ่ม Event Listener เพื่อดักจับการกด Ctrl+P สำหรับการพิมพ์
+      document.addEventListener('keydown', function (event) {
+        // ตรวจสอบว่ามีการกด Ctrl+P (หรือ Cmd+P บน Mac)
+        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'p') {
+          const doc1Page = document.getElementById('document-page');
+          const doc2Page = document.getElementById('document2-page');
+
+          // ถ้าหน้าเอกสารส่วนที่ 1 แสดงอยู่ ให้สั่งพิมพ์ส่วนที่ 1
+          if (doc1Page && !doc1Page.classList.contains('hidden')) {
+            event.preventDefault(); // ป้องกันการทำงานปริ้นท์ปกติของเบราว์เซอร์
+            printDocument('document-page', 'portrait');
+          }
+          // ถ้าหน้าเอกสารส่วนที่ 2 แสดงอยู่ ให้สั่งพิมพ์ส่วนที่ 2
+          else if (doc2Page && !doc2Page.classList.contains('hidden')) {
+            event.preventDefault(); // ป้องกันการทำงานปริ้นท์ปกติของเบราว์เซอร์
+            printDocument('document2-page', 'portrait');
+          }
+        }
+      });
+
+      // ==========================================
+      // ระบบตรวจจับ Ctrl+P และตั้งค่าหน้ากระดาษอัตโนมัติ
+      // ==========================================
+      window.addEventListener('beforeprint', () => {
+        // 1. เช็คว่าเอกสารส่วนที่ 3 (แนวนอน) กำลังแสดงอยู่หรือไม่
+        const doc3Page = document.getElementById('document3-page');
+        // ถ้า doc3Page ไม่มีคลาส 'hidden' แสดงว่ากำลังเปิดหน้านี้อยู่
+        const isDoc3Active = doc3Page && !doc3Page.classList.contains('hidden');
+
+        // 2. สร้างหรือดึง <style> สำหรับคุมหน้ากระดาษ
+        let printStyle = document.getElementById('auto-print-orientation');
+        if (!printStyle) {
+          printStyle = document.createElement('style');
+          printStyle.id = 'auto-print-orientation';
+          document.head.appendChild(printStyle);
+        }
+
+        // 3. สั่งเปลี่ยนกระดาษตามหน้าที่เปิดอยู่
+        if (isDoc3Active) {
+          // ถ้าอยู่ส่วนที่ 3 ให้บังคับกระดาษเป็นแนวนอน
+          printStyle.innerHTML = '@page { size: A4 landscape !important; margin: 0 !important; }';
+        } else {
+          // ถ้าอยู่ส่วนที่ 1 หรือ 2 ให้บังคับกระดาษเป็นแนวตั้ง
+          printStyle.innerHTML = '@page { size: A4 portrait !important; margin: 0 !important; }';
+        }
+      });
+
+      // Function to convert Thai numerals to Arabic numerals
+      function thaiToArabic(thaiNum) {
+        if (!thaiNum) return '';
+        const thaiDigits = [/๐/g, /๑/g, /๒/g, /๓/g, /๔/g, /๕/g, /๖/g, /๗/g, /๘/g, /๙/g];
+        let arabicNum = thaiNum;
+        for (let i = 0; i < 10; i++) {
+          arabicNum = arabicNum.replace(thaiDigits[i], i);
+        }
+        return arabicNum;
+      }
+
+      // Function to convert Arabic numerals to Thai numerals
+      function arabicToThai(arabicNum) {
+        if (!arabicNum) return '';
+        const arabicDigits = [/0/g, /1/g, /2/g, /3/g, /4/g, /5/g, /6/g, /7/g, /8/g, /9/g];
+        const thaiDigits = ["๐", "๑", "๒", "๓", "๔", "๕", "๖", "๗", "๘", "๙"];
+        let thaiNum = arabicNum;
+        for (let i = 0; i < 10; i++) {
+          thaiNum = thaiNum.replace(arabicDigits[i], thaiDigits[i]);
+        }
+        return thaiNum;
+      }
+
+      // ฟังก์ชันแปลงตัวเลขเป็นข้อความบาท (ภาษาไทย)
+      function getThaiBahtText(amount) {
+        if (amount === 0) return "-";
+        const numberText = ["ศูนย์", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า"];
+        const unitText = ["", "สิบ", "ร้อย", "พัน", "หมื่น", "แสน", "ล้าน"];
+        let amountStr = parseFloat(Math.abs(amount)).toFixed(2);
+        let parts = amountStr.split('.');
+
+        let processPart = (str) => {
+          let result = "";
+          let len = str.length;
+          for (let i = 0; i < len; i++) {
+            let digit = parseInt(str.charAt(i));
+            let position = len - i - 1;
+            if (digit !== 0) {
+              if (position === 1 && digit === 1) result += "สิบ";
+              else if (position === 1 && digit === 2) result += "ยี่สิบ";
+              else if (position === 0 && digit === 1 && len > 1 && str.charAt(i - 1) !== '0') result += "เอ็ด";
+              else result += numberText[digit] + unitText[position % 6];
+
+              if (position > 0 && position % 6 === 0) result += "ล้าน";
+            }
+          }
+          return result;
+        };
+
+        let bahtText = processPart(parts[0]) + "บาท";
+        let satangText = parseInt(parts[1]) === 0 ? "ถ้วน" : processPart(parts[1]) + "สตางค์";
+        return bahtText + satangText;
+      }
+
+      function parseNumber(text) {
+        const arabicText = thaiToArabic(text || '').replace(/,/g, '');
+        const number = parseFloat(arabicText);
+        return isNaN(number) ? 0 : number;
+      }
+
+      // ฟังก์ชันจัดรูปแบบตัวเลข (อัปเดต: ไม่บังคับใส่ทศนิยม .00)
+      function formatNumber(number) {
+        if (number === 0) return '';
+
+        // เช็คว่าตัวเลขนี้มีเศษทศนิยมหรือไม่ (ถ้าหาร 1 แล้วเหลือเศษ แปลว่ามีทศนิยม)
+        const hasDecimal = number % 1 !== 0;
+
+        // ถ้ามีเศษทศนิยมให้แสดง 2 ตำแหน่ง (เช่น .50) ถ้าไม่มีเศษให้แสดงเป็นจำนวนเต็ม (0 ตำแหน่ง)
+        const formattedArabic = number.toLocaleString('en-US', {
+          minimumFractionDigits: hasDecimal ? 2 : 0,
+          maximumFractionDigits: 2
+        });
+
+        return arabicToThai(formattedArabic);
+      }
+
+      function calculateTotals() {
+        const expenseRows = document.querySelectorAll('.expense-row');
+        let grandMealTotal = 0;
+        let grandLodgingTotal = 0;
+        let grandTransportTotal = 0;
+        let grandOtherTotal = 0;
+        let grandTotal = 0;
+
+        expenseRows.forEach(row => {
+          const meal = parseNumber(row.querySelector('.meal-input').textContent);
+          const lodging = parseNumber(row.querySelector('.lodging-input').textContent);
+          const transport = parseNumber(row.querySelector('.transport-input').textContent);
+          const other = parseNumber(row.querySelector('.other-input').textContent);
+
+          const rowTotal = meal + lodging + transport + other;
+          row.querySelector('.row-total').textContent = formatNumber(rowTotal);
+
+          grandMealTotal += meal;
+          grandLodgingTotal += lodging;
+          grandTransportTotal += transport;
+          grandOtherTotal += other;
+          grandTotal += rowTotal;
+        });
+
+        document.querySelector('.grand-meal-total').textContent = formatNumber(grandMealTotal);
+        document.querySelector('.grand-lodging-total').textContent = formatNumber(grandLodgingTotal);
+        document.querySelector('.grand-transport-total').textContent = formatNumber(grandTransportTotal);
+        document.querySelector('.grand-other-total').textContent = formatNumber(grandOtherTotal);
+        document.querySelector('.grand-total').textContent = formatNumber(grandTotal);
+
+        const totalWordsElement = document.querySelector('.doc3-totalWords');
+        if (totalWordsElement) {
+          // แก้ไขตรงนี้: เรียกใช้ฟังก์ชัน getThaiBahtText เพื่อแปลงตัวเลขยอดรวมเป็นอักษรไทย
+          totalWordsElement.textContent = grandTotal > 0 ? getThaiBahtText(grandTotal) : '-';
+        }
+      }
+
+      document.addEventListener('input', (e) => {
+        if (e.target.classList.contains('expense-input')) {
+          calculateTotals();
+        }
+      });
+
+      // Initial calculation
+      window.addEventListener('load', calculateTotals);
+
+      init();
+    </script>
+</body>
+
+</html>
