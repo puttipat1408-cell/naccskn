@@ -180,6 +180,18 @@
       margin-top: 2px;
     }
 
+    .timeline-item.completed {
+      border-left-color: #22c55e;
+      background-color: #f0fdf4;
+    }
+
+    .timeline-item.completed .timeline-dot {
+      background-color: #22c55e;
+      width: 16px;
+      height: 16px;
+      margin-top: 2px;
+    }
+
     .history-card {
       background: white;
       border: 1px solid #e5e7eb;
@@ -409,7 +421,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">สังกัด</label>
                 <input type="text" id="department"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value="สำนักงาน ป.ป.ช. ประจำจังหวัดสกลนคร" readonly>
+                  value="คลังจังหวัดสกลนคร" readonly>
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">ผู้ร่วมเดินทาง (ถ้ามี)</label>
@@ -718,9 +730,12 @@
         <div id="save-message" class="mt-4 p-3 rounded hidden text-center font-semibold"></div>
       </div>
       <div class="text-center py-6">
-        <p class="text-gray-500 text-lg font-bold">👨‍💻 พัฒนาโดย นายกิตติชัย เหล่าลุมพุก</p>
-        <p class="text-gray-400 text-sm font-bold">พนักงานบริหารทั่วไปปฏิบัติงาน</p>
-        <!--p class="text-gray-400 text-sm font-bold">สำนักงาน ป.ป.ช. ประจำจังหวัดสกลนคร</p-->
+        <p class="text-gray-500 text-lg font-bold">👨‍💻 พัฒนาโดย นางสาวพรรณลิณี แผนเมือง</p>
+        <p class="text-gray-400 text-sm font-bold">นักวิชาการเงินและบัญชี</p>
+        <!--p class="text-gray-400 text-sm font-bold">กลุ่มงานวิชาการ</p-->
+        <p class="text-gray-500 text-lg font-bold">👨‍💻 ผู้ร่วมทีมพัฒนา นางสาวอาลิตา เชาวนประเสริฐ</p>
+        <p class="text-gray-400 text-sm font-bold">นักจัดการงานทั่วไปปฏิบัติการ</p>
+        <!--p class="text-gray-400 text-sm">สำนักงานคลังจังหวัดสกลนคร</p-->
       </div>
     </div>
 
@@ -787,7 +802,7 @@
           </div>
           <div class="flex items-end gap-1">
             <span class="w-10">เรียน</span>
-            <span contenteditable="true" class="editable-field w-1/2">สำนักงาน ป.ป.ช. ประจำจังหวัดสกลนคร</span>
+            <span contenteditable="true" class="editable-field w-1/2">คลังจังหวัดสกลนคร</span>
           </div>
         </div>
 
@@ -1715,10 +1730,14 @@
                 </div>
               </div>
             </div>
+            <div class="flex justify-end mt-4">
+              <button type="button" onclick="saveVerifier()"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors shadow-sm">บันทึกข้อมูลผู้ตรวจสอบ</button>
+            </div>
           </fieldset>
 
           <!-- Section 3: Decision -->
-          <fieldset class="border rounded-lg p-4 bg-yellow-50">
+          <fieldset id="decision-section" class="border rounded-lg p-4 bg-yellow-50">
             <legend class="text-lg font-semibold text-yellow-900 px-2">🎯 การพิจารณา</legend>
             <div class="space-y-4 mt-4">
               <div>
@@ -1819,11 +1838,15 @@
                   </div>
                 </div>
               </div>
+              <div class="flex justify-end mt-4">
+                <button type="button" onclick="saveDecisionMaker()"
+                  class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors shadow-sm">บันทึกข้อมูลการพิจารณา</button>
+              </div>
             </div>
           </fieldset>
 
           <!-- Section 4: Approver Info -->
-          <fieldset class="border rounded-lg p-4 bg-indigo-50">
+          <fieldset id="approver-section" class="border rounded-lg p-4 bg-indigo-50">
             <legend class="text-lg font-semibold text-indigo-900 px-2">👤 ผู้อนุมัติ</legend>
             <div class="grid grid-cols-1 gap-4 mt-4">
               <div>
@@ -1896,31 +1919,30 @@
               </div>
 
             </div>
-
+            <div class="flex justify-end mt-4">
+              <button type="button" onclick="saveApprover()"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors shadow-sm">บันทึกการอนุมัติ</button>
+            </div>
           </fieldset>
 
 
 
           <!-- Buttons -->
-          <div class="flex gap-3 justify-center">
-            <button type="submit"
-              class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewbox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg> บันทึกการอนุมัติ </button>
+          <div class="flex gap-3 justify-center mt-6">
             <button type="button" onclick="clearApprovalForm()"
-              class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-lg font-semibold transition-colors">
+              class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-lg font-semibold transition-colors shadow-sm">
               ล้างฟอร์ม </button>
           </div>
         </form>
         <div id="approval-message" class="mt-4 p-3 rounded hidden text-center font-semibold"></div>
       </div>
       <div class="text-center py-6">
-        <p class="text-gray-500 text-lg font-bold">👨‍💻 พัฒนาโดย นายกิตติชัย เหล่าลุมพุก</p>
-        <p class="text-gray-400 text-sm font-bold">พนักงานบริหารทั่วไปปฏิบัติงาน</p>
-        <!--p class="text-gray-400 text-sm font-bold">สำนักงาน ป.ป.ช. ประจำจังหวัดสกลนคร</p-->
+        <p class="text-gray-500 text-lg font-bold">👨‍💻 พัฒนาโดย นางสาวพรรณลิณี แผนเมือง</p>
+        <p class="text-gray-400 text-sm font-bold">นักวิชาการเงินและบัญชี</p>
+        <!--p class="text-gray-400 text-sm font-bold">กลุ่มงานวิชาการ</p-->
+        <p class="text-gray-500 text-lg font-bold">👨‍💻 ผู้ร่วมทีมพัฒนา นางสาวอาลิตา เชาวนประเสริฐ</p>
+        <p class="text-gray-400 text-sm font-bold">นักจัดการงานทั่วไปปฏิบัติการ</p>
+        <!--p class="text-gray-400 text-sm">สำนักงานคลังจังหวัดสกลนคร</p-->
       </div>
     </div>
 
@@ -1992,10 +2014,13 @@
           </div>
         </div>
         <div class="text-center py-6">
-        <p class="text-gray-500 text-lg font-bold">👨‍💻 พัฒนาโดย นายกิตติชัย เหล่าลุมพุก</p>
-        <p class="text-gray-400 text-sm font-bold">พนักงานบริหารทั่วไปปฏิบัติงาน</p>
-        <!--p class="text-gray-400 text-sm font-bold">สำนักงาน ป.ป.ช. ประจำจังหวัดสกลนคร</p-->
-      </div>
+          <p class="text-gray-500 text-lg font-bold">👨‍💻 พัฒนาโดย นางสาวพรรณลิณี แผนเมือง</p>
+          <p class="text-gray-400 text-sm font-bold">นักวิชาการเงินและบัญชี</p>
+          <!--p class="text-gray-400 text-sm font-bold">กลุ่มงานวิชาการ</p-->
+          <p class="text-gray-500 text-lg font-bold">👨‍💻 ผู้ร่วมทีมพัฒนา นางสาวอาลิตา เชาวนประเสริฐ</p>
+          <p class="text-gray-400 text-sm font-bold">นักจัดการงานทั่วไปปฏิบัติการ</p>
+          <!--p class="text-gray-400 text-sm">สำนักงานคลังจังหวัดสกลนคร</p-->
+        </div>
       </div>
 
     </div>
@@ -2090,8 +2115,7 @@
 
     <script>
       // Staff position mapping
-      
-        const staffPositions = {
+      const staffPositions = {
   'นางสาวมญชุ์ญาณิศ พงศ์เพชรดิถ': 'ผู้อำนวยการ สปจ.สกลนคร',
   'นายเกียรติศักดิ์ ศรีนิล': 'พนักงานไต่สวน ระดับสูง',
   'นายสัญญา แก่นจำปา': 'เจ้าพนักงานป้องกันการทุจริตชำนาญการพิเศษ',
@@ -2116,7 +2140,6 @@
   'นายวรา บัวพันธ์': 'พนักงานขับรถยนต์',
   'นางสาวอาภาพร คำทะเนตร': 'พนักงานทั่วไป'
 };
-     
 
       let allRecords = [];
       let trackingHistory = [];
@@ -2732,6 +2755,36 @@
         }
       }
 
+      function evaluateApprovalState() {
+        const decisionSection = document.getElementById('decision-section');
+        const approverSection = document.getElementById('approver-section');
+
+        if (decisionSection && approverSection) {
+          const decisionSectionInputs = decisionSection.querySelectorAll('input, select, textarea, button');
+          const approverSectionInputs = approverSection.querySelectorAll('input, select, textarea, button');
+
+          const isVerifierSaved = approvalData && approvalData.verifierName;
+          decisionSectionInputs.forEach(input => {
+            input.disabled = !isVerifierSaved;
+          });
+          if (!isVerifierSaved) {
+            decisionSection.classList.add('opacity-50');
+          } else {
+            decisionSection.classList.remove('opacity-50');
+          }
+
+          const isDecisionSaved = approvalData && approvalData.decisionMakerName && approvalData.decision;
+          approverSectionInputs.forEach(input => {
+            input.disabled = !isDecisionSaved;
+          });
+          if (!isDecisionSaved) {
+            approverSection.classList.add('opacity-50');
+          } else {
+            approverSection.classList.remove('opacity-50');
+          }
+        }
+      }
+
       function loadApprovalForm() {
         if (allRecords.length > 0) {
           const data = allRecords[0];
@@ -2742,27 +2795,75 @@
           const endDate = `${data.endDate}/${data.endMonth}/${data.endYear}`;
           document.getElementById('approvalTravelPeriod').value = `${startDate} - ${endDate}`;
         }
+
+        if (approvalData) {
+          document.getElementById('verifierName').value = approvalData.verifierName || '';
+          document.getElementById('verifierPosition').value = approvalData.verifierPosition || '';
+          document.getElementById('verifyDate_day').value = approvalData.verifyDate_day || '';
+          document.getElementById('verifyDate_month').value = approvalData.verifyDate_month || '';
+          document.getElementById('verifyDate_year').value = approvalData.verifyDate_year || '';
+
+          document.getElementById('decisionMakerName').value = approvalData.decisionMakerName || '';
+          document.getElementById('decisionMakerPosition').value = approvalData.decisionMakerPosition || '';
+          document.getElementById('decisionDate_day').value = approvalData.decisionDate_day || '';
+          document.getElementById('decisionDate_month').value = approvalData.decisionDate_month || '';
+          document.getElementById('decisionDate_year').value = approvalData.decisionDate_year || '';
+
+          if (approvalData.decision) {
+            const radio = document.querySelector(`input[name="approvalDecision"][value="${approvalData.decision}"]`);
+            if (radio) radio.checked = true;
+          }
+          document.getElementById('approvalNotes').value = approvalData.notes || '';
+
+          document.getElementById('approverName').value = approvalData.approverName || '';
+          document.getElementById('approverPosition').value = approvalData.approverPosition || '';
+          document.getElementById('approvalDate_day').value = approvalData.approvalDate_day || '';
+          document.getElementById('approvalDate_month').value = approvalData.approvalDate_month || '';
+          document.getElementById('approvalDate_year').value = approvalData.approvalDate_year || '';
+        }
+        evaluateApprovalState();
       }
 
       function updateTrackingWithApproval() {
         if (!approvalData) return;
+
+        const isVerified = !!approvalData.verifierName;
+        const isDecided = !!approvalData.decisionMakerName && !!approvalData.decision;
+        const isApproved = !!approvalData.approverName;
+
         let statusText = '';
         let statusClass = '';
-        if (approvalData.decision === 'approved') {
-          statusText = '✅ อนุมัติแล้ว';
-          statusClass = 'text-green-600';
-        } else if (approvalData.decision === 'rejected') {
-          statusText = '❌ ไม่อนุมัติ';
-          statusClass = 'text-red-600';
-        } else if (approvalData.decision === 'pending') {
-          statusText = '⏳ รอการแก้ไข';
-          statusClass = 'text-orange-600';
+
+        if (isApproved) {
+          if (approvalData.decision === 'approved') {
+            statusText = '✅ อนุมัติแล้ว';
+            statusClass = 'text-green-600';
+          } else if (approvalData.decision === 'rejected') {
+            statusText = '❌ ไม่อนุมัติ';
+            statusClass = 'text-red-600';
+          } else if (approvalData.decision === 'pending') {
+            statusText = '⏳ รอการแก้ไข';
+            statusClass = 'text-orange-600';
+          }
+        } else if (isDecided) {
+          if (approvalData.decision === 'approved') {
+            statusText = '⏳ รอผู้อนุมัติ';
+            statusClass = 'text-blue-600';
+          } else {
+            statusText = '⏳ รอการแก้ไข/ไม่อนุมัติ';
+            statusClass = 'text-orange-600';
+          }
+        } else if (isVerified) {
+          statusText = '⏳ รอผู้พิจารณา';
+          statusClass = 'text-blue-600';
         }
+
         const statusElement = document.getElementById('current-status');
         if (statusElement) {
           statusElement.textContent = statusText;
           statusElement.className = `text-2xl font-bold ${statusClass}`;
         }
+
         const timelineContainer = document.getElementById('timeline-container');
         if (timelineContainer) {
           timelineContainer.innerHTML = '';
@@ -2771,68 +2872,107 @@
               icon: '📝',
               title: 'บันทึกข้อมูล',
               desc: allRecords.length > 0 ? '✅ เสร็จเรียบร้อย' : 'รอการกรอกฟอร์ม',
-              active: allRecords.length > 0
+              active: allRecords.length > 0 && !isVerified,
+              completed: isVerified,
+              editAction: 'showPage(\'form\')'
+            },
+            {
+              icon: '🔍',
+              title: 'การตรวจสอบ',
+              desc: isVerified ? `ตรวจสอบโดย: ${approvalData.verifierName}` : 'รอการตรวจสอบ',
+              active: isVerified && !isDecided,
+              completed: isDecided,
+              editAction: 'showPage(\'approval\')'
+            },
+            {
+              icon: '🎯',
+              title: 'การพิจารณา',
+              desc: isDecided ? `พิจารณาโดย: ${approvalData.decisionMakerName}` : 'รอการพิจารณา',
+              active: isDecided && !isApproved,
+              completed: isApproved,
+              editAction: 'showPage(\'approval\')'
             },
             {
               icon: '✅',
               title: 'การอนุมัติ',
-              desc: `ผู้อนุมัติ: ${approvalData.approverName}`,
-              active: true
-            },
-            {
-              icon: '📄',
-              title: 'เสร็จสิ้น',
-              desc: approvalData.decision === 'approved' ? '✅ ได้รับอนุมัติ' : 'รอการแก้ไข',
-              active: approvalData.decision === 'approved'
+              desc: isApproved ? `ผู้อนุมัติ: ${approvalData.approverName}` : 'รอการอนุมัติ',
+              active: isApproved && approvalData.decision === 'pending',
+              completed: isApproved && approvalData.decision === 'approved',
+              editAction: 'showPage(\'approval\')'
             }
           ];
+
           timeline.forEach(item => {
             const timelineItem = document.createElement('div');
-            timelineItem.className = `timeline-item ${item.active ? 'active' : ''}`;
+            let itemClass = '';
+            if (item.completed) {
+              itemClass = 'completed';
+            } else if (item.active) {
+              itemClass = 'active';
+            }
+            timelineItem.className = `timeline-item ${itemClass}`;
+            let titleColor = item.completed ? 'text-green-800' : 'text-gray-800';
+            let descColor = item.completed ? 'text-green-600' : 'text-gray-600';
+
+            let editBtnHtml = '';
+            if (item.completed || item.active) {
+              editBtnHtml = `<button onclick="${item.editAction}" class="text-xs text-blue-500 hover:text-blue-700 underline mt-1">✏️ แก้ไข</button>`;
+            }
+
             timelineItem.innerHTML = `
 <div class="timeline-dot"></div>
-<div>
-<p class="font-semibold text-gray-800">${item.icon} ${item.title}</p>
-<p class="text-sm text-gray-600">${item.desc}</p>
+<div class="flex-1 flex justify-between items-start">
+  <div>
+    <p class="font-semibold ${titleColor}">${item.icon} ${item.title}</p>
+    <p class="text-sm ${descColor}">${item.desc}</p>
+    ${editBtnHtml}
+  </div>
 </div>
 `;
             timelineContainer.appendChild(timelineItem);
           });
         }
+
         const historyContainer = document.getElementById('history-container');
         if (historyContainer) {
           const card = document.createElement('div');
           card.className = 'history-card';
           let statusBadgeClass = 'status-pending';
           let statusBadgeText = 'รอการแก้ไข';
-          if (approvalData.decision === 'approved') {
-            statusBadgeClass = 'status-approved';
-            statusBadgeText = 'อนุมัติแล้ว';
-          } else if (approvalData.decision === 'rejected') {
-            statusBadgeClass = 'status-rejected';
-            statusBadgeText = 'ไม่อนุมัติ';
+
+          if (isApproved) {
+            if (approvalData.decision === 'approved') {
+              statusBadgeClass = 'status-approved';
+              statusBadgeText = 'อนุมัติแล้ว';
+            } else if (approvalData.decision === 'rejected') {
+              statusBadgeClass = 'status-rejected';
+              statusBadgeText = 'ไม่อนุมัติ';
+            }
+          } else if (isDecided) {
+            statusBadgeClass = 'status-pending';
+            statusBadgeText = 'พิจารณาแล้ว';
+          } else if (isVerified) {
+            statusBadgeClass = 'status-pending';
+            statusBadgeText = 'ตรวจสอบแล้ว';
           }
+
           card.innerHTML = `
 <div class="flex justify-between items-start mb-3">
 <div>
-<p class="font-semibold text-gray-800">การอนุมัติ</p>
+<p class="font-semibold text-gray-800">อัปเดตสถานะล่าสุด</p>
 <p class="text-sm text-gray-500">${approvalData.timestamp}</p>
 </div>
 <span class="status-badge ${statusBadgeClass}">${statusBadgeText}</span>
 </div>
 <div class="grid grid-cols-2 gap-2 text-sm">
-<p><span class="font-medium">ผู้อนุมัติ:</span> ${approvalData.approverName}</p>
-<p><span class="font-medium">ตำแหน่ง:</span> ${approvalData.approverPosition}</p>
-<p colspan="2"><span class="font-medium">หมายเหตุ:</span> ${approvalData.notes || '-'}</p>
+${isVerified ? `<p><span class="font-medium">ผู้ตรวจสอบ:</span> ${approvalData.verifierName}</p>` : ''}
+${isDecided ? `<p><span class="font-medium">ผู้พิจารณา:</span> ${approvalData.decisionMakerName}</p>` : ''}
+${isApproved ? `<p><span class="font-medium">ผู้อนุมัติ:</span> ${approvalData.approverName}</p>` : ''}
+<p class="col-span-2"><span class="font-medium">หมายเหตุ:</span> ${approvalData.notes || '-'}</p>
 </div>
 `;
-          const firstCard = historyContainer.querySelector('.history-card');
-          if (firstCard) {
-            historyContainer.insertBefore(card, firstCard);
-          } else {
-            historyContainer.innerHTML = '';
-            historyContainer.appendChild(card);
-          }
+          historyContainer.innerHTML = '';
+          historyContainer.appendChild(card);
         }
       }
 
@@ -2850,7 +2990,7 @@
         document.getElementById('total-amount').textContent = grandTotal.toLocaleString() + ' บาท';
         document.getElementById('requester-name').textContent = data.fullName || '-';
 
-        if (approvalData) {
+        if (approvalData && (approvalData.verifierName || approvalData.decisionMakerName || approvalData.approverName)) {
           updateTrackingWithApproval();
         } else {
           let status = 'บันทึกข้อมูลแล้ว';
@@ -2866,29 +3006,60 @@
               icon: '📝',
               title: 'บันทึกข้อมูล',
               desc: '✅ เสร็จเรียบร้อย',
-              active: true
+              active: true,
+              completed: false,
+              editAction: 'showPage(\'form\')'
+            },
+            {
+              icon: '🔍',
+              title: 'การตรวจสอบ',
+              desc: 'รอการตรวจสอบเอกสาร',
+              active: false,
+              completed: false,
+              editAction: 'showPage(\'approval\')'
+            },
+            {
+              icon: '🎯',
+              title: 'การพิจารณา',
+              desc: 'รอการพิจารณา',
+              active: false,
+              completed: false,
+              editAction: 'showPage(\'approval\')'
             },
             {
               icon: '✅',
-              title: 'รอการอนุมัติ',
-              desc: 'ระบบรอการลงนามจากผู้อนุมัติ',
-              active: false
-            },
-            {
-              icon: '📄',
-              title: 'เสร็จสิ้น',
-              desc: 'กระบวนการเสร็จสิ้น',
-              active: false
+              title: 'การอนุมัติ',
+              desc: 'รอผู้อนุมัติลงนาม',
+              active: false,
+              completed: false,
+              editAction: 'showPage(\'approval\')'
             }
           ];
           timeline.forEach(item => {
             const timelineItem = document.createElement('div');
-            timelineItem.className = `timeline-item ${item.active ? 'active' : ''}`;
+            let itemClass = '';
+            if (item.completed) {
+              itemClass = 'completed';
+            } else if (item.active) {
+              itemClass = 'active';
+            }
+            timelineItem.className = `timeline-item ${itemClass}`;
+            let titleColor = item.completed ? 'text-green-800' : 'text-gray-800';
+            let descColor = item.completed ? 'text-green-600' : 'text-gray-600';
+
+            let editBtnHtml = '';
+            if (item.completed || item.active) {
+              editBtnHtml = `<button onclick="${item.editAction}" class="text-xs text-blue-500 hover:text-blue-700 underline mt-1">✏️ แก้ไข</button>`;
+            }
+
             timelineItem.innerHTML = `
 <div class="timeline-dot"></div>
-<div>
-<p class="font-semibold text-gray-800">${item.icon} ${item.title}</p>
-<p class="text-sm text-gray-600">${item.desc}</p>
+<div class="flex-1 flex justify-between items-start">
+  <div>
+    <p class="font-semibold ${titleColor}">${item.icon} ${item.title}</p>
+    <p class="text-sm ${descColor}">${item.desc}</p>
+    ${editBtnHtml}
+  </div>
 </div>
 `;
             timelineContainer.appendChild(timelineItem);
@@ -2929,7 +3100,10 @@
       function clearApprovalForm() {
         document.getElementById('approval-form').reset();
         document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
+        document.getElementById('verifierPosition').value = '';
+        document.getElementById('decisionMakerPosition').value = '';
         document.getElementById('approverPosition').value = '';
+        evaluateApprovalState();
         showApprovalMessage('✨ ล้างแบบฟอร์มแล้ว', 'green');
       }
 
@@ -3043,56 +3217,91 @@
         showPage('document');
       });
 
+      // Removed global approval form submit listener since we have individual save buttons
+      // Removed generic handleApprovalChange triggered by input
+
       document.getElementById('approval-form').addEventListener('submit', (e) => {
         e.preventDefault();
-        const decision = document.querySelector('input[name="approvalDecision"]:checked')?.value;
-        if (!decision) {
-          showApprovalMessage('❌ กรุณาเลือกการตัดสินใจ', 'red');
+      });
+
+      function saveVerifier() {
+        const verifierName = document.getElementById('verifierName').value;
+        if (!verifierName) {
+          showApprovalMessage('❌ กรุณาเลือกชื่อผู้ตรวจสอบ', 'red');
           return;
         }
-        if (!document.getElementById('approverName').value) {
+        if (!approvalData) approvalData = {};
+
+        approvalData.verifierName = verifierName;
+        approvalData.verifierPosition = document.getElementById('verifierPosition').value;
+        approvalData.verifyDate_day = document.getElementById('verifyDate_day').value;
+        approvalData.verifyDate_month = document.getElementById('verifyDate_month').value;
+        approvalData.verifyDate_year = document.getElementById('verifyDate_year').value;
+        approvalData.timestamp = new Date().toLocaleString('th-TH');
+
+        saveToLocalStorage();
+        syncApprovalToDocument2();
+        updateTrackingWithApproval();
+        evaluateApprovalState();
+        showApprovalMessage('✅ บันทึกข้อมูลการตรวจสอบสำเร็จ!', 'green');
+      }
+
+      function saveDecisionMaker() {
+        const decisionMakerName = document.getElementById('decisionMakerName').value;
+        const decision = document.querySelector('input[name="approvalDecision"]:checked')?.value;
+
+        if (!decisionMakerName) {
+          showApprovalMessage('❌ กรุณาเลือกชื่อผู้พิจารณา', 'red');
+          return;
+        }
+        if (!decision) {
+          showApprovalMessage('❌ กรุณาเลือกผลการพิจารณา', 'red');
+          return;
+        }
+        if (!approvalData) approvalData = {};
+
+        approvalData.decisionMakerName = decisionMakerName;
+        approvalData.decisionMakerPosition = document.getElementById('decisionMakerPosition').value;
+        approvalData.decisionDate_day = document.getElementById('decisionDate_day').value;
+        approvalData.decisionDate_month = document.getElementById('decisionDate_month').value;
+        approvalData.decisionDate_year = document.getElementById('decisionDate_year').value;
+        approvalData.decision = decision;
+        approvalData.notes = document.getElementById('approvalNotes').value;
+        approvalData.timestamp = new Date().toLocaleString('th-TH');
+
+        saveToLocalStorage();
+        syncApprovalToDocument2();
+        updateTrackingWithApproval();
+        evaluateApprovalState();
+        showApprovalMessage('✅ บันทึกข้อมูลการพิจารณาสำเร็จ!', 'green');
+      }
+
+      function saveApprover() {
+        const approverName = document.getElementById('approverName').value;
+
+        if (!approverName) {
           showApprovalMessage('❌ กรุณาเลือกชื่อผู้อนุมัติ', 'red');
           return;
         }
-        if (!document.getElementById('approverPosition').value) {
-          showApprovalMessage('❌ กรุณาเลือกตำแหน่งผู้อนุมัติ', 'red');
-          return;
-        }
-        approvalData = {
-          approverName: document.getElementById('approverName').value,
-          approverPosition: document.getElementById('approverPosition').value,
-          decision: decision,
-          notes: document.getElementById('approvalNotes').value,
-          timestamp: new Date().toLocaleString('th-TH')
-        };
-        saveToLocalStorage(); // บันทึกข้อมูลการอนุมัติลง localStorage
+        if (!approvalData) approvalData = {};
+
+        approvalData.approverName = approverName;
+        approvalData.approverPosition = document.getElementById('approverPosition').value;
+        approvalData.approvalDate_day = document.getElementById('approvalDate_day').value;
+        approvalData.approvalDate_month = document.getElementById('approvalDate_month').value;
+        approvalData.approvalDate_year = document.getElementById('approvalDate_year').value;
+        approvalData.timestamp = new Date().toLocaleString('th-TH');
+
+        saveToLocalStorage();
         syncApprovalToDocument2();
-        showApprovalMessage(`✅ บันทึกการอนุมัติสำเร็จ! (${decision === 'approved' ? 'อนุมัติ' : decision === 'rejected' ? 'ไม่อนุมัติ' : 'รอการแก้ไข'})`, 'green');
         updateTrackingWithApproval();
-        showPage('document2');
-      });
+        evaluateApprovalState();
+        showApprovalMessage('✅ บันทึกข้อมูลการอนุมัติสำเร็จ!', 'green');
 
-      document.getElementById('verifierName').addEventListener('change', syncApprovalToDocument2);
-      document.getElementById('verifierPosition').addEventListener('change', syncApprovalToDocument2);
-      document.getElementById('verifyDate_day').addEventListener('change', syncApprovalToDocument2);
-      document.getElementById('verifyDate_month').addEventListener('change', syncApprovalToDocument2);
-      document.getElementById('verifyDate_year').addEventListener('change', syncApprovalToDocument2);
-
-      document.getElementById('decisionMakerName').addEventListener('change', syncApprovalToDocument2);
-      document.getElementById('decisionMakerPosition').addEventListener('change', syncApprovalToDocument2);
-      document.getElementById('decisionDate_day').addEventListener('change', syncApprovalToDocument2);
-      document.getElementById('decisionDate_month').addEventListener('change', syncApprovalToDocument2);
-      document.getElementById('decisionDate_year').addEventListener('change', syncApprovalToDocument2);
-
-      document.getElementById('approverName').addEventListener('change', syncApprovalToDocument2);
-      document.getElementById('approverPosition').addEventListener('change', syncApprovalToDocument2);
-      document.getElementById('approvalDate_day').addEventListener('change', syncApprovalToDocument2);
-      document.getElementById('approvalDate_month').addEventListener('change', syncApprovalToDocument2);
-      document.getElementById('approvalDate_year').addEventListener('change', syncApprovalToDocument2);
-      document.getElementById('approvalNotes').addEventListener('input', syncApprovalToDocument2);
-      document.getElementsByName('approvalDecision').forEach(radio => {
-        radio.addEventListener('change', syncApprovalToDocument2);
-      });
+        setTimeout(() => {
+          showPage('tracking');
+        }, 1000);
+      }
 
       document.getElementById('startDate').addEventListener('change', calculateTravelTime);
       document.getElementById('startMonth').addEventListener('change', calculateTravelTime);
@@ -3490,6 +3699,3 @@
 </body>
 
 </html>
-
-
-
